@@ -27,6 +27,27 @@ public class CitaService {
                 .collect(Collectors.toList());
     }
 
+    public List<CitaDTO> filtroActivas() {
+    return citaRepository.findByEstadoTrueOrderByIdCitaDesc()
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+}
+
+    public List<CitaDTO> filtroMascota(Integer idMascota) {
+    return citaRepository.findByIdMascota_IdMascota(idMascota)
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+}
+
+    public List<CitaDTO> filtroMedico(Integer idMedico) {
+    return citaRepository.findByIdMedico_IdMedico(idMedico)
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+}
+
     public CitaDTO findById(Integer id) {
         Cita entity = citaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada"));

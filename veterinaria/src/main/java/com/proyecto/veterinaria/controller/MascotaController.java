@@ -16,6 +16,26 @@ public class MascotaController {
         this.mascotaService = mascotaService;
     }
 
+    @GetMapping("/activas")
+    public List<MascotaDTO> mostrarActivas() {
+    return mascotaService.filtroActivas();
+    }
+
+    @GetMapping("/dueno/{idDueno}")
+    public List<MascotaDTO> porDueno(@PathVariable Integer idDueno) {
+    return mascotaService.filtroIdDueno(idDueno);
+    }
+
+    @GetMapping("/especie/{especie}")
+    public List<MascotaDTO> porEspecie(@PathVariable String especie) {
+    return mascotaService.filtroEspecie(especie);
+    }
+
+    @GetMapping("/buscar")
+    public List<MascotaDTO> buscarPorNombre(@RequestParam String nombre) {
+    return mascotaService.filtroNombre(nombre);
+    }
+
     @GetMapping
     public List<MascotaDTO> mostrarTodas() {
         return mascotaService.findAll();

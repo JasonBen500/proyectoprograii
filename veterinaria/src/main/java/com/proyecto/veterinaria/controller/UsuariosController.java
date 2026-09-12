@@ -16,6 +16,21 @@ public class UsuariosController {
         this.usuariosService = usuariosService;
     }
 
+    @GetMapping("/activos")
+    public List<UsuariosDTO> mostrarActivos() {
+    return usuariosService.filtroActivos();
+    }
+
+    @GetMapping("/existeUsuario/{usuario}")
+    public boolean existeUsuario(@PathVariable String usuario) {
+    return usuariosService.existeUsuario(usuario);
+    }
+
+    @GetMapping("/existeCorreo/{correo}")
+    public boolean existeCorreo(@PathVariable String correo) {
+    return usuariosService.existeCorreo(correo);
+    }
+
     @GetMapping
     public List<UsuariosDTO> mostrarTodos() {
         return usuariosService.findAll();

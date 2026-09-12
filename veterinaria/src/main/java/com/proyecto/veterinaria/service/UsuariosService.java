@@ -18,6 +18,21 @@ public class UsuariosService {
         this.usuariosRepository = usuariosRepository;
     }
 
+    public List<UsuariosDTO> filtroActivos() {
+    return usuariosRepository.findByEstadoTrueOrderByIdUsuarioDesc()
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+
+    public boolean existeUsuario(String usuario) {
+    return usuariosRepository.existsByUsuario(usuario);
+    }
+
+    public boolean existeCorreo(String correo) {
+    return usuariosRepository.existsByCorreo(correo);
+    }
+
     public List<UsuariosDTO> findAll() {
         return usuariosRepository.findAll()
                 .stream()

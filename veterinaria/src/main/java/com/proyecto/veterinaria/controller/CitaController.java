@@ -2,6 +2,7 @@ package com.proyecto.veterinaria.controller;
 
 import com.proyecto.veterinaria.dto.CitaDTO;
 import com.proyecto.veterinaria.service.CitaService;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,6 +12,21 @@ import java.util.List;
 public class CitaController {
 
     private final CitaService citaService;
+
+    @GetMapping("/activas")
+    public List<CitaDTO> mostrarActivas() {
+    return citaService.filtroActivas();
+    }
+
+    @GetMapping("/mascota/{idMascota}")
+    public List<CitaDTO> porMascota(@PathVariable Integer idMascota) {
+    return citaService.filtroMascota(idMascota);
+    }
+
+    @GetMapping("/medico/{idMedico}")
+    public List<CitaDTO> porMedico(@PathVariable Integer idMedico) {
+    return citaService.filtroMedico(idMedico);
+    }
 
     public CitaController(CitaService citaService) {
         this.citaService = citaService;

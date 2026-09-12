@@ -18,6 +18,24 @@ public class MedicoService {
         this.medicoRepository = medicoRepository;
     }
 
+    public List<MedicoDTO> filtroActivos() {
+    return medicoRepository.findByEstadoTrueOrderByIdMedicoDesc()
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+
+    public List<MedicoDTO> filtroEspecialidad(String especialidad) {
+    return medicoRepository.findByEspecialidadIgnoreCase(especialidad)
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+
+    public boolean Cedula(String cedula) {
+    return medicoRepository.existsByCedula(cedula);
+    }
+
     public List<MedicoDTO> findAll() {
         return medicoRepository.findAll()
                 .stream()

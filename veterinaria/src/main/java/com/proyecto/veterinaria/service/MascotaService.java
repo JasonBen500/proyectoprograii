@@ -18,6 +18,34 @@ public class MascotaService {
         this.mascotaRepository = mascotaRepository;
     }
 
+    public List<MascotaDTO> filtroActivas() {
+    return mascotaRepository.findByEstadoTrueOrderByIdMascotaDesc()
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+
+    public List<MascotaDTO> filtroIdDueno(Integer idDueno) {
+    return mascotaRepository.findByIdDueno_IdDueno(idDueno)
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+
+    public List<MascotaDTO> filtroEspecie(String especie) {
+    return mascotaRepository.findByEspecieIgnoreCase(especie)
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+
+    public List<MascotaDTO> filtroNombre(String nombre) {
+    return mascotaRepository.findByNombreContainingIgnoreCase(nombre)
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+
     public List<MascotaDTO> findAll() {
         return mascotaRepository.findAll()
                 .stream()

@@ -16,6 +16,21 @@ public class MedicoController {
         this.medicoService = medicoService;
     }
 
+    @GetMapping("/activos")
+    public List<MedicoDTO> mostrarActivos() {
+    return medicoService.filtroActivos();
+    }
+
+    @GetMapping("/especialidad/{especialidad}")
+    public List<MedicoDTO> porEspecialidad(@PathVariable String especialidad) {
+    return medicoService.filtroEspecialidad(especialidad);
+    }
+
+    @GetMapping("/cedula/{cedula}")
+    public boolean existeCedula(@PathVariable String cedula) {
+    return medicoService.Cedula(cedula);
+    }
+
     @GetMapping
     public List<MedicoDTO> mostrarTodos() {
         return medicoService.findAll();

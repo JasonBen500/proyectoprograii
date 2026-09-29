@@ -31,7 +31,7 @@ public class DuenoController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@RequestBody DuenoDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody DuenoDTO dto) {
         try {
             duenoService.crear(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -43,7 +43,7 @@ public class DuenoController {
     }
 
     @PutMapping("/modificar/{id}")
-    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody DuenoDTO dto) {
+    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody DuenoDTO dto) {
         try {
             duenoService.actualizar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Dueno actualizado con exito"));

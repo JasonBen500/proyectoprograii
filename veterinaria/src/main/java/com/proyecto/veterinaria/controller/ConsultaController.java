@@ -31,7 +31,7 @@ public class ConsultaController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@RequestBody ConsultaDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody ConsultaDTO dto) {
         try {
             consultaService.crear(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -43,7 +43,7 @@ public class ConsultaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody ConsultaDTO dto) {
+    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody ConsultaDTO dto) {
         try {
             consultaService.actualizar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Consulta actualizada con exito"));

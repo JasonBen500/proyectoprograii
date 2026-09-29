@@ -31,7 +31,7 @@ public class PerfilController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@RequestBody PerfilDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@valid @RequestBody PerfilDTO dto) {
         try {
             perfilService.crear(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -43,7 +43,7 @@ public class PerfilController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody PerfilDTO dto) {
+    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody PerfilDTO dto) {
         try {
             perfilService.actualizar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Perfil actualizado con exito"));

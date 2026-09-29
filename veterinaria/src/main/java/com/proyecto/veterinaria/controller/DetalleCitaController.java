@@ -31,7 +31,7 @@ public class DetalleCitaController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@RequestBody DetalleCitaDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody DetalleCitaDTO dto) {
         try {
             detalleCitaService.crear(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -43,7 +43,7 @@ public class DetalleCitaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody DetalleCitaDTO dto) {
+    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody DetalleCitaDTO dto) {
         try {
             detalleCitaService.actualizar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Detalle de cita actualizado con exito"));

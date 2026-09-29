@@ -51,7 +51,7 @@ public class MascotaController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@RequestBody MascotaDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@Vañid @RequestBody MascotaDTO dto) {
         try {
             mascotaService.agregar(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -63,7 +63,7 @@ public class MascotaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody MascotaDTO dto) {
+    public ResponseEntity<MessageResponse> modificar(@valid @PathVariable Integer id, @RequestBody MascotaDTO dto) {
         try {
             mascotaService.modificar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Mascota actualizada con exito"));

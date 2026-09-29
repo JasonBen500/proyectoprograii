@@ -46,7 +46,7 @@ public class UsuariosController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@RequestBody UsuariosDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody UsuariosDTO dto) {
         try {
             usuariosService.agregar(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -58,7 +58,7 @@ public class UsuariosController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody UsuariosDTO dto) {
+    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody UsuariosDTO dto) {
         try {
             usuariosService.modificar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Usuario actualizado con exito"));

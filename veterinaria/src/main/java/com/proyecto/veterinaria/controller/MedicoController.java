@@ -46,7 +46,7 @@ public class MedicoController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@RequestBody MedicoDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody MedicoDTO dto) {
         try {
             medicoService.agregar(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -58,7 +58,7 @@ public class MedicoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody MedicoDTO dto) {
+    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody MedicoDTO dto) {
         try {
             medicoService.modificar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Medico actualizado con exito"));

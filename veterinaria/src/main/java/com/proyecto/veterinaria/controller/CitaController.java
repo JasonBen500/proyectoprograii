@@ -46,7 +46,7 @@ public class CitaController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@RequestBody CitaDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody CitaDTO dto) {
         try {
             citaService.crear(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -58,7 +58,7 @@ public class CitaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody CitaDTO dto) {
+    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody CitaDTO dto) {
         try {
             citaService.modificar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Cita actualizada con exito"));

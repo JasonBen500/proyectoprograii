@@ -1,7 +1,11 @@
 package com.proyecto.veterinaria.controller;
 
 import com.proyecto.veterinaria.dto.DetalleCitaDTO;
+import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.service.DetalleCitaService;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,23 +31,48 @@ public class DetalleCitaController {
     }
 
     @PostMapping
-    public DetalleCitaDTO agregar(@RequestBody DetalleCitaDTO dto) {
-        return detalleCitaService.crear(dto);
+    public ResponseEntity<MessageResponse> agregar(@RequestBody DetalleCitaDTO dto) {
+        try {
+            detalleCitaService.crear(dto);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new MessageResponse("Detalle de cita creado con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al crear el detalle de cita"));
+        }
     }
 
     @PutMapping("/{id}")
-    public DetalleCitaDTO modificar(@PathVariable Integer id, @RequestBody DetalleCitaDTO dto) {
-        return detalleCitaService.actualizar(id, dto);
+    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody DetalleCitaDTO dto) {
+        try {
+            detalleCitaService.actualizar(id, dto);
+            return ResponseEntity.ok(new MessageResponse("Detalle de cita actualizado con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al actualizar el detalle de cita"));
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Integer id) {
-        detalleCitaService.eliminar(id);
+    public ResponseEntity<MessageResponse> eliminar(@PathVariable Integer id) {
+        try {
+            detalleCitaService.eliminar(id);
+            return ResponseEntity.ok(new MessageResponse("Detalle de cita eliminado con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al eliminar el detalle de cita"));
+        }
     }
 
     @PatchMapping("/{id}/anular")
-    public DetalleCitaDTO anular(@PathVariable Integer id) {
-        return detalleCitaService.anular(id);
+    public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
+        try {
+            detalleCitaService.anular(id);
+            return ResponseEntity.ok(new MessageResponse("Detalle de cita anulado con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al anular el detalle de cita"));
+        }
     }
 
     @GetMapping("/activos")

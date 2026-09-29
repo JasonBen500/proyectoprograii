@@ -1,8 +1,11 @@
 package com.proyecto.veterinaria.controller;
 
 import com.proyecto.veterinaria.dto.CitaDTO;
+import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.service.CitaService;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,17 +18,17 @@ public class CitaController {
 
     @GetMapping("/activas")
     public List<CitaDTO> mostrarActivas() {
-    return citaService.filtroActivas();
+        return citaService.filtroActivas();
     }
 
     @GetMapping("/mascota/{idMascota}")
     public List<CitaDTO> porMascota(@PathVariable Integer idMascota) {
-    return citaService.filtroMascota(idMascota);
+        return citaService.filtroMascota(idMascota);
     }
 
     @GetMapping("/medico/{idMedico}")
     public List<CitaDTO> porMedico(@PathVariable Integer idMedico) {
-    return citaService.filtroMedico(idMedico);
+        return citaService.filtroMedico(idMedico);
     }
 
     public CitaController(CitaService citaService) {
@@ -43,22 +46,47 @@ public class CitaController {
     }
 
     @PostMapping
-    public CitaDTO agregar(@RequestBody CitaDTO dto) {
-        return citaService.crear(dto);
+    public ResponseEntity<MessageResponse> agregar(@RequestBody CitaDTO dto) {
+        try {
+            citaService.crear(dto);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new MessageResponse("Cita creada con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al crear la cita"));
+        }
     }
 
     @PutMapping("/{id}")
-    public CitaDTO modificar(@PathVariable Integer id, @RequestBody CitaDTO dto) {
-        return citaService.modificar(id, dto);
+    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody CitaDTO dto) {
+        try {
+            citaService.modificar(id, dto);
+            return ResponseEntity.ok(new MessageResponse("Cita actualizada con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al actualizar la cita"));
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Integer id) {
-        citaService.eliminar(id);
+    public ResponseEntity<MessageResponse> eliminar(@PathVariable Integer id) {
+        try {
+            citaService.eliminar(id);
+            return ResponseEntity.ok(new MessageResponse("Cita eliminada con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al eliminar la cita"));
+        }
     }
 
     @PatchMapping("/{id}/anular")
-    public CitaDTO anular(@PathVariable Integer id) {
-        return citaService.anular(id);
+    public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
+        try {
+            citaService.anular(id);
+            return ResponseEntity.ok(new MessageResponse("Cita anulada con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al anular la cita"));
+        }
     }
 }

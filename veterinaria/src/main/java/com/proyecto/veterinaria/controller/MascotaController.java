@@ -1,7 +1,11 @@
 package com.proyecto.veterinaria.controller;
 
 import com.proyecto.veterinaria.dto.MascotaDTO;
+import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.service.MascotaService;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,22 +22,22 @@ public class MascotaController {
 
     @GetMapping("/activas")
     public List<MascotaDTO> mostrarActivas() {
-    return mascotaService.filtroActivas();
+        return mascotaService.filtroActivas();
     }
 
     @GetMapping("/dueno/{idDueno}")
     public List<MascotaDTO> porDueno(@PathVariable Integer idDueno) {
-    return mascotaService.filtroIdDueno(idDueno);
+        return mascotaService.filtroIdDueno(idDueno);
     }
 
     @GetMapping("/especie/{especie}")
     public List<MascotaDTO> porEspecie(@PathVariable String especie) {
-    return mascotaService.filtroEspecie(especie);
+        return mascotaService.filtroEspecie(especie);
     }
 
     @GetMapping("/buscar")
     public List<MascotaDTO> buscarPorNombre(@RequestParam String nombre) {
-    return mascotaService.filtroNombre(nombre);
+        return mascotaService.filtroNombre(nombre);
     }
 
     @GetMapping
@@ -47,22 +51,47 @@ public class MascotaController {
     }
 
     @PostMapping
-    public MascotaDTO agregar(@RequestBody MascotaDTO dto) {
-        return mascotaService.agregar(dto);
+    public ResponseEntity<MessageResponse> agregar(@RequestBody MascotaDTO dto) {
+        try {
+            mascotaService.agregar(dto);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new MessageResponse("Mascota creada con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al crear la mascota"));
+        }
     }
 
     @PutMapping("/{id}")
-    public MascotaDTO modificar(@PathVariable Integer id, @RequestBody MascotaDTO dto) {
-        return mascotaService.modificar(id, dto);
+    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @RequestBody MascotaDTO dto) {
+        try {
+            mascotaService.modificar(id, dto);
+            return ResponseEntity.ok(new MessageResponse("Mascota actualizada con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al actualizar la mascota"));
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Integer id) {
-        mascotaService.eliminar(id);
+    public ResponseEntity<MessageResponse> eliminar(@PathVariable Integer id) {
+        try {
+            mascotaService.eliminar(id);
+            return ResponseEntity.ok(new MessageResponse("Mascota eliminada con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al eliminar la mascota"));
+        }
     }
 
     @PatchMapping("/{id}/anular")
-    public MascotaDTO anular(@PathVariable Integer id) {
-        return mascotaService.anular(id);
+    public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
+        try {
+            mascotaService.anular(id);
+            return ResponseEntity.ok(new MessageResponse("Mascota anulada con exito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al anular la mascota"));
+        }
     }
 }

@@ -4,6 +4,8 @@ import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.dto.PerfilDTO;
 import com.proyecto.veterinaria.service.PerfilService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +34,7 @@ public class PerfilController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@valid @RequestBody PerfilDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody PerfilDTO dto) {
         try {
             perfilService.crear(dto);
             return ResponseEntity.status(HttpStatus.CREATED)

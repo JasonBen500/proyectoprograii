@@ -4,6 +4,8 @@ import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.dto.TratamientoDTO;
 import com.proyecto.veterinaria.service.TratamientoService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +34,7 @@ public class TratamientoController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@valid @RequestBody TratamientoDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody TratamientoDTO dto) {
         try {
             tratamientoService.crear(dto);
             return ResponseEntity.status(HttpStatus.CREATED)

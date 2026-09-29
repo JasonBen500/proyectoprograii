@@ -4,6 +4,8 @@ import com.proyecto.veterinaria.dto.MascotaDTO;
 import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.service.MascotaService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,7 +54,7 @@ public class MascotaController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@Vañid @RequestBody MascotaDTO dto) {
+    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody MascotaDTO dto) {
         try {
             mascotaService.agregar(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -64,7 +66,7 @@ public class MascotaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@valid @PathVariable Integer id, @RequestBody MascotaDTO dto) {
+    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody MascotaDTO dto) {
         try {
             mascotaService.modificar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Mascota actualizada con exito"));

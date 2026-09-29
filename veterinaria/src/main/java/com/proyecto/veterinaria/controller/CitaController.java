@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/citas")
+@CrossOrigin (origins = "http://localhost:5173/")
 public class CitaController {
 
     private final CitaService citaService;

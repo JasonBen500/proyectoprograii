@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/detalle-citas")
+@CrossOrigin (origins = "http://localhost:5173/")
 public class DetalleCitaController {
 
     private final DetalleCitaService detalleCitaService;

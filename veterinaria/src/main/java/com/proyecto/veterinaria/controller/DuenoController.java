@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/dueños")
+@CrossOrigin (origins = "http://localhost:5173/")
 public class DuenoController {
 
     private final DuenoService duenoService;

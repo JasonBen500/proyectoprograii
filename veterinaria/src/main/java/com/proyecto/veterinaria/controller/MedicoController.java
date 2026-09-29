@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/medicos")
+@CrossOrigin (origins = "http://localhost:5173/")
 public class MedicoController {
 
     private final MedicoService medicoService;

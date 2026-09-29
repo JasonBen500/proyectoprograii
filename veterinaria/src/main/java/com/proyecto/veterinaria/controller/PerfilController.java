@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/perfiles")
+@CrossOrigin (origins = "http://localhost:5173/")
 public class PerfilController {
 
     private final PerfilService perfilService;

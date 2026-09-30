@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/dueños")
+@RequestMapping("/duenos")
 @CrossOrigin (origins = "http://localhost:5173/")
 public class DuenoController {
 

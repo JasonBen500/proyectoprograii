@@ -1,5 +1,7 @@
 package com.proyecto.veterinaria.controller;
 
+import com.proyecto.veterinaria.dto.LoginRequestDTO;
+import com.proyecto.veterinaria.dto.LoginResponseDTO;
 import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.dto.UsuariosDTO;
 import com.proyecto.veterinaria.service.UsuariosService;
@@ -14,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
-@CrossOrigin (origins = "http://localhost:5173/")
+@CrossOrigin(origins = "http://localhost:5173/")
 public class UsuariosController {
 
     private final UsuariosService usuariosService;
@@ -90,6 +92,17 @@ public class UsuariosController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error al anular el usuario"));
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO dto) {
+        try {
+            LoginResponseDTO respuesta = usuariosService.login(dto);
+            return ResponseEntity.ok(respuesta);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse(e.getMessage()));
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.proyecto.veterinaria.controller;
 
+import com.proyecto.veterinaria.dto.DuenoDTO;
 import com.proyecto.veterinaria.dto.MascotaDTO;
 import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.service.MascotaService;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/mascotas")
-@CrossOrigin (origins = "http://localhost:5173/")
+@CrossOrigin(origins = "http://localhost:5173/")
 public class MascotaController {
 
     private final MascotaService mascotaService;
@@ -54,11 +55,10 @@ public class MascotaController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody MascotaDTO dto) {
+    public ResponseEntity<?> agregar(@Valid @RequestBody MascotaDTO dto) {
         try {
-            mascotaService.agregar(dto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new MessageResponse("Mascota creada con exito"));
+            MascotaDTO creado = mascotaService.agregar(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(creado);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error al crear la mascota"));

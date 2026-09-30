@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/duenos")
-@CrossOrigin (origins = "http://localhost:5173/")
+@CrossOrigin(origins = "http://localhost:5173/")
 public class DuenoController {
 
     private final DuenoService duenoService;
@@ -34,14 +34,13 @@ public class DuenoController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody DuenoDTO dto) {
+    public ResponseEntity<?> agregar(@Valid @RequestBody DuenoDTO dto) {
         try {
-            duenoService.crear(dto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new MessageResponse("Dueno creado con exito"));
+            DuenoDTO creado = duenoService.crear(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(creado);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al crear el dueno"));
+                    .body(new MessageResponse("Error al crear el dueño"));
         }
     }
 

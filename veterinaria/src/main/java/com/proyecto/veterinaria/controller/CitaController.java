@@ -1,6 +1,7 @@
 package com.proyecto.veterinaria.controller;
 
 import com.proyecto.veterinaria.dto.CitaDTO;
+import com.proyecto.veterinaria.dto.DuenoDTO;
 import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.service.CitaService;
 
@@ -14,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/citas")
-@CrossOrigin (origins = "http://localhost:5173/")
+@CrossOrigin(origins = "http://localhost:5173/")
 public class CitaController {
 
     private final CitaService citaService;
@@ -49,11 +50,10 @@ public class CitaController {
     }
 
     @PostMapping
-    public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody CitaDTO dto) {
+    public ResponseEntity<?> agregar(@Valid @RequestBody CitaDTO dto) {
         try {
-            citaService.crear(dto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new MessageResponse("Cita creada con exito"));
+            CitaDTO creado = citaService.crear(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(creado);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error al crear la cita"));

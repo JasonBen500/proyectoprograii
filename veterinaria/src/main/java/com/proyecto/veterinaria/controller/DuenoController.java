@@ -55,17 +55,6 @@ public class DuenoController {
         }
     }
 
-    @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<MessageResponse> eliminar(@PathVariable Integer id) {
-        try {
-            duenoService.eliminar(id);
-            return ResponseEntity.ok(new MessageResponse("Dueno eliminado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al eliminar el dueno"));
-        }
-    }
-
     @PatchMapping("/anular/{id}")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
         try {

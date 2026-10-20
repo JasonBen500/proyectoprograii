@@ -72,10 +72,6 @@ public class UsuariosService {
         return convertToDTO(usuariosRepository.save(entity));
     }
 
-    public void eliminar(Integer id) {
-        usuariosRepository.deleteById(id);
-    }
-
     public UsuariosDTO anular(Integer id) {
         Usuarios entity = usuariosRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -104,6 +100,7 @@ public class UsuariosService {
         dto.setCorreo(entity.getCorreo());
         dto.setEstado(entity.getEstado());
         dto.setIdPerfil(entity.getIdPerfil() != null ? entity.getIdPerfil().getIdPerfil() : null);
+        dto.setNombrePerfil(NombresUtil.perfil(entity.getIdPerfil()));
         return dto;
     }
 

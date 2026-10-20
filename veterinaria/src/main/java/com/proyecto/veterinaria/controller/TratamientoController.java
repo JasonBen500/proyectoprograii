@@ -56,16 +56,6 @@ public class TratamientoController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<MessageResponse> eliminar(@PathVariable Integer id) {
-        try {
-            tratamientoService.eliminar(id);
-            return ResponseEntity.ok(new MessageResponse("Tratamiento eliminado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al eliminar el tratamiento"));
-        }
-    }
 
     @PatchMapping("/{id}/anular")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {

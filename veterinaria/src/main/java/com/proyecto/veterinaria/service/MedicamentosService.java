@@ -4,6 +4,9 @@ import com.proyecto.veterinaria.dto.MedicamentosDTO;
 import com.proyecto.veterinaria.entity.Medicamentos;
 import com.proyecto.veterinaria.repository.MedicamentosRepository;
 import org.springframework.stereotype.Service;
+import com.proyecto.veterinaria.exception.ReglaNegocioException;
+import com.proyecto.veterinaria.repository.DetalleCitaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,9 +15,12 @@ import java.util.stream.Collectors;
 public class MedicamentosService {
 
     private final MedicamentosRepository medicamentosRepository;
+    private final DetalleCitaRepository detalleCitaRepository;
 
-    public MedicamentosService(MedicamentosRepository medicamentosRepository) {
+    public MedicamentosService(MedicamentosRepository medicamentosRepository,
+            DetalleCitaRepository detalleCitaRepository) {
         this.medicamentosRepository = medicamentosRepository;
+        this.detalleCitaRepository = detalleCitaRepository;
     }
 
     public List<MedicamentosDTO> findAll() {
@@ -49,6 +55,10 @@ public class MedicamentosService {
     }
 
     public void eliminar(Integer id) {
+        if (detalleCitaRepository.existsByIdMedicamento_IdMedicamento(id)) {
+            throw new ReglaNegocioException(
+                    "No se puede eliminar: el medicamento ya se usó en citas. Use Anular.");
+        }
         medicamentosRepository.deleteById(id);
     }
 
@@ -84,6 +94,27 @@ public class MedicamentosService {
         return medicamentosRepository.existsByNombreIgnoreCase(nombre);
     }
 
+    @Transactional
+    public MedicamentosDTO ajustarStock(Integer id, Integer cambio) {
+        Medicamentos entity = medicamentosRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Medicamento no encontrado"));
+
+        int actual = entity.getStock() == null ? 0 : entity.getStock();
+        int nuevoStock = actual + cambio;
+
+        if (nuevoStock < 0) {
+            throw new ReglaNegocioException(
+                    "Stock insuficiente de " + entity.getNombre() + ": hay " + actual + " disponibles.");
+        }
+        entity.setStock(nuevoStock);
+        return convertToDTO(medicamentosRepository.save(entity));
+    }
+
+    // Texto vacío = sin imagen
+    private String normalizarImagen(String imagen) {
+        return imagen == null || imagen.isBlank() ? null : imagen;
+    }
+
     private Medicamentos convertToEntity(MedicamentosDTO dto) {
         Medicamentos entity = new Medicamentos();
         entity.setNombre(dto.getNombre());
@@ -91,6 +122,10 @@ public class MedicamentosService {
         entity.setPrecio(dto.getPrecio());
         entity.setStock(dto.getStock());
         entity.setEstado(dto.getEstado());
+        entity.setImagen(normalizarImagen(dto.getImagen()));
+        if (dto.getImagen() != null) {
+            entity.setImagen(normalizarImagen(dto.getImagen()));
+        }
         return entity;
     }
 
@@ -102,6 +137,7 @@ public class MedicamentosService {
         dto.setPrecio(entity.getPrecio());
         dto.setStock(entity.getStock());
         dto.setEstado(entity.getEstado());
+        dto.setImagen(entity.getImagen());
         return dto;
     }
 }

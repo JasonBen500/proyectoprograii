@@ -16,4 +16,5 @@ public interface DetalleCitaRepository extends JpaRepository<DetalleCita, Intege
     List<DetalleCita> findByIdMedicamento_IdMedicamento(Integer idMedicamento);
 
     List<DetalleCita> findByIdTratamiento_IdTratamiento(Integer idTratamiento);
+    boolean existsByIdMedicamento_IdMedicamento(Integer idMedicamento);
 }

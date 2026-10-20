@@ -14,6 +14,7 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Lob;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -25,7 +26,7 @@ import java.util.Collection;
 @Entity
 @Table(name = "medicamentos")
 @NamedQueries({
-    @NamedQuery(name = "Medicamentos.findAll", query = "SELECT m FROM Medicamentos m")})
+        @NamedQuery(name = "Medicamentos.findAll", query = "SELECT m FROM Medicamentos m") })
 public class Medicamentos implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -38,13 +39,17 @@ public class Medicamentos implements Serializable {
     private String nombre;
     @Column(name = "DESCRIPCION")
     private String descripcion;
-    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    // @Max(value=?) @Min(value=?)//if you know range of your decimal fields
+    // consider using these annotations to enforce field validation
     @Column(name = "PRECIO")
     private BigDecimal precio;
     @Column(name = "STOCK")
     private Integer stock;
     @Column(name = "ESTADO")
     private Boolean estado;
+    @Lob
+    @Column(name = "IMAGEN")
+    private String imagen;
     @OneToMany(mappedBy = "idMedicamento")
     private Collection<DetalleCita> detalleCitaCollection;
 
@@ -103,6 +108,14 @@ public class Medicamentos implements Serializable {
         this.estado = estado;
     }
 
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
+    }
+
     public Collection<DetalleCita> getDetalleCitaCollection() {
         return detalleCitaCollection;
     }
@@ -125,7 +138,8 @@ public class Medicamentos implements Serializable {
             return false;
         }
         Medicamentos other = (Medicamentos) object;
-        if ((this.idMedicamento == null && other.idMedicamento != null) || (this.idMedicamento != null && !this.idMedicamento.equals(other.idMedicamento))) {
+        if ((this.idMedicamento == null && other.idMedicamento != null)
+                || (this.idMedicamento != null && !this.idMedicamento.equals(other.idMedicamento))) {
             return false;
         }
         return true;
@@ -135,5 +149,5 @@ public class Medicamentos implements Serializable {
     public String toString() {
         return "com.proyecto.veterinaria.entity.Medicamentos[ idMedicamento=" + idMedicamento + " ]";
     }
-    
+
 }

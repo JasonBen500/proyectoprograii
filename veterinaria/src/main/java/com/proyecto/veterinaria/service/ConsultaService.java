@@ -77,10 +77,6 @@ public class ConsultaService {
         return convertToDTO(consultaRepository.save(entity));
     }
 
-    public void eliminar(Integer id) {
-        consultaRepository.deleteById(id);
-    }
-
     public ConsultaDTO anular(Integer id) {
         Consulta entity = consultaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consulta no encontrada"));
@@ -105,6 +101,7 @@ public class ConsultaService {
         dto.setSintomas(entity.getSintomas());
         dto.setEstado(entity.getEstado());
         dto.setIdCita(entity.getIdCita() != null ? entity.getIdCita().getIdCita() : null);
+        dto.setDescripcionCita(NombresUtil.cita(entity.getIdCita()));
         return dto;
     }
 }

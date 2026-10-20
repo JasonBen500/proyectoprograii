@@ -68,10 +68,6 @@ public class MedicoService {
         return convertToDTO(medicoRepository.save(entity));
     }
 
-    public void eliminar(Integer id) {
-        medicoRepository.deleteById(id);
-    }
-
     public MedicoDTO anular(Integer id) {
         Medico entity = medicoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Medico no encontrado"));
@@ -99,6 +95,7 @@ public class MedicoService {
         dto.setEspecialidad(entity.getEspecialidad());
         dto.setEstado(entity.getEstado());
         dto.setIdUsuario(entity.getIdUsuario() != null ? entity.getIdUsuario().getIdUsuario() : null);
+        dto.setNombreUsuario(NombresUtil.usuario(entity.getIdUsuario()));
         return dto;
     }
 }

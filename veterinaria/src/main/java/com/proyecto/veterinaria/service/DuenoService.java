@@ -76,9 +76,6 @@ public class DuenoService {
         return convertToDTO(duenoRepository.save(entity));
     }
 
-    public void eliminar(Integer id) {
-        duenoRepository.deleteById(id);
-    }
 
     public DuenoDTO anular(Integer id) {
         Dueno entity = duenoRepository.findById(id)

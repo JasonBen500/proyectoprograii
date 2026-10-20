@@ -22,4 +22,7 @@ public class MedicamentosDTO {
     private Integer stock;
 
     private Boolean estado;
+
+    @Size(max = 700000, message = "La imagen es demasiado grande")
+    private String imagen;
 }

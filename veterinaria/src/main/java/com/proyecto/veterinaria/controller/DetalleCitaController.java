@@ -2,6 +2,7 @@ package com.proyecto.veterinaria.controller;
 
 import com.proyecto.veterinaria.dto.DetalleCitaDTO;
 import com.proyecto.veterinaria.dto.MessageResponse;
+import com.proyecto.veterinaria.exception.ReglaNegocioException;
 import com.proyecto.veterinaria.service.DetalleCitaService;
 
 import jakarta.validation.Valid;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/detalle-citas")
-@CrossOrigin (origins = "http://localhost:5173/")
+@CrossOrigin(origins = "http://localhost:5173/")
 public class DetalleCitaController {
 
     private final DetalleCitaService detalleCitaService;
@@ -39,10 +40,15 @@ public class DetalleCitaController {
             detalleCitaService.crear(dto);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new MessageResponse("Detalle de cita creado con exito"));
+
+        } catch (ReglaNegocioException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new MessageResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error al crear el detalle de cita"));
         }
+
     }
 
     @PutMapping("/{id}")
@@ -50,20 +56,12 @@ public class DetalleCitaController {
         try {
             detalleCitaService.actualizar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Detalle de cita actualizado con exito"));
+        } catch (ReglaNegocioException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new MessageResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error al actualizar el detalle de cita"));
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<MessageResponse> eliminar(@PathVariable Integer id) {
-        try {
-            detalleCitaService.eliminar(id);
-            return ResponseEntity.ok(new MessageResponse("Detalle de cita eliminado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al eliminar el detalle de cita"));
         }
     }
 

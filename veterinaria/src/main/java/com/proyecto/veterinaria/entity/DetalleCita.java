@@ -25,7 +25,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "detalle_cita")
 @NamedQueries({
-    @NamedQuery(name = "DetalleCita.findAll", query = "SELECT d FROM DetalleCita d")})
+        @NamedQuery(name = "DetalleCita.findAll", query = "SELECT d FROM DetalleCita d") })
 public class DetalleCita implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -34,7 +34,8 @@ public class DetalleCita implements Serializable {
     @Basic(optional = false)
     @Column(name = "ID_DETALLE_CITA")
     private Integer idDetalleCita;
-    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    // @Max(value=?) @Min(value=?)//if you know range of your decimal fields
+    // consider using these annotations to enforce field validation
     @Column(name = "PRECIO_APLICADO")
     private BigDecimal precioAplicado;
     @Column(name = "ESTADO")
@@ -48,6 +49,8 @@ public class DetalleCita implements Serializable {
     @JoinColumn(name = "ID_TRATAMIENTO", referencedColumnName = "ID_TRATAMIENTO")
     @ManyToOne
     private Tratamiento idTratamiento;
+    @Column(name = "CANTIDAD")
+    private Integer cantidad;
 
     public DetalleCita() {
     }
@@ -104,6 +107,14 @@ public class DetalleCita implements Serializable {
         this.idTratamiento = idTratamiento;
     }
 
+    public Integer getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -118,7 +129,8 @@ public class DetalleCita implements Serializable {
             return false;
         }
         DetalleCita other = (DetalleCita) object;
-        if ((this.idDetalleCita == null && other.idDetalleCita != null) || (this.idDetalleCita != null && !this.idDetalleCita.equals(other.idDetalleCita))) {
+        if ((this.idDetalleCita == null && other.idDetalleCita != null)
+                || (this.idDetalleCita != null && !this.idDetalleCita.equals(other.idDetalleCita))) {
             return false;
         }
         return true;
@@ -128,5 +140,5 @@ public class DetalleCita implements Serializable {
     public String toString() {
         return "com.proyecto.veterinaria.entity.DetalleCita[ idDetalleCita=" + idDetalleCita + " ]";
     }
-    
+
 }

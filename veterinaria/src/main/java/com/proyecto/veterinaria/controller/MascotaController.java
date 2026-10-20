@@ -1,6 +1,5 @@
 package com.proyecto.veterinaria.controller;
 
-import com.proyecto.veterinaria.dto.DuenoDTO;
 import com.proyecto.veterinaria.dto.MascotaDTO;
 import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.service.MascotaService;
@@ -73,17 +72,6 @@ public class MascotaController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error al actualizar la mascota"));
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<MessageResponse> eliminar(@PathVariable Integer id) {
-        try {
-            mascotaService.eliminar(id);
-            return ResponseEntity.ok(new MessageResponse("Mascota eliminada con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al eliminar la mascota"));
         }
     }
 

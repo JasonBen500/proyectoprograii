@@ -45,9 +45,6 @@ public class PerfilService {
         return convertToDTO(perfilRepository.save(entity));
     }
 
-    public void eliminar(Integer id) {
-        perfilRepository.deleteById(id);
-    }
 
     public PerfilDTO anular(Integer id) {
         Perfil entity = perfilRepository.findById(id)

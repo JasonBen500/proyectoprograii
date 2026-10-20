@@ -46,9 +46,6 @@ public class TratamientoService {
         return convertToDTO(tratamientoRepository.save(entity));
     }
 
-    public void eliminar(Integer id) {
-        tratamientoRepository.deleteById(id);
-    }
 
     public TratamientoDTO anular(Integer id) {
         Tratamiento entity = tratamientoRepository.findById(id)

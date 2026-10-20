@@ -3,18 +3,20 @@ package com.proyecto.veterinaria.controller;
 import com.proyecto.veterinaria.dto.MedicamentosDTO;
 import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.service.MedicamentosService;
+import com.proyecto.veterinaria.exception.ReglaNegocioException;
 
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.proyecto.veterinaria.exception.ReglaNegocioException;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/medicamentos")
-@CrossOrigin (origins = "http://localhost:5173/")
+@CrossOrigin(origins = "http://localhost:5173/")
 public class MedicamentosController {
 
     private final MedicamentosService medicamentosService;
@@ -46,7 +48,8 @@ public class MedicamentosController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody MedicamentosDTO dto) {
+    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id,
+            @RequestBody MedicamentosDTO dto) {
         try {
             medicamentosService.actualizar(id, dto);
             return ResponseEntity.ok(new MessageResponse("Medicamento actualizado con exito"));
@@ -61,6 +64,9 @@ public class MedicamentosController {
         try {
             medicamentosService.eliminar(id);
             return ResponseEntity.ok(new MessageResponse("Medicamento eliminado con exito"));
+        } catch (ReglaNegocioException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new MessageResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error al eliminar el medicamento"));
@@ -91,5 +97,18 @@ public class MedicamentosController {
     @GetMapping("/stock-bajo/{cantidad}")
     public List<MedicamentosDTO> stockBajo(@PathVariable Integer cantidad) {
         return medicamentosService.findStockBajo(cantidad);
+    }
+
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<?> ajustarStock(@PathVariable Integer id, @RequestParam Integer cambio) {
+        try {
+            return ResponseEntity.ok(medicamentosService.ajustarStock(id, cambio));
+        } catch (ReglaNegocioException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new MessageResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error al ajustar el stock"));
+        }
     }
 }

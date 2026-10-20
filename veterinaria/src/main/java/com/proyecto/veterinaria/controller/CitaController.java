@@ -1,9 +1,9 @@
 package com.proyecto.veterinaria.controller;
 
 import com.proyecto.veterinaria.dto.CitaDTO;
-import com.proyecto.veterinaria.dto.DuenoDTO;
 import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.service.CitaService;
+import com.proyecto.veterinaria.exception.ReglaNegocioException;
 
 import jakarta.validation.Valid;
 
@@ -76,6 +76,10 @@ public class CitaController {
         try {
             citaService.eliminar(id);
             return ResponseEntity.ok(new MessageResponse("Cita eliminada con exito"));
+
+        } catch (ReglaNegocioException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new MessageResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error al eliminar la cita"));

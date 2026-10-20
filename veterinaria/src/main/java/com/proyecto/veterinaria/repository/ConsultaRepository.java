@@ -12,4 +12,5 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Integer> {
     List<Consulta> findByEstadoTrueOrderByIdConsultaDesc();
     List<Consulta> findByIdCita_IdCita(Integer idCita);
     List<Consulta> findByDiagnosticoContainingIgnoreCase(String diagnostico);
+    boolean existsByIdCita_IdCita(Integer idCita);
 }

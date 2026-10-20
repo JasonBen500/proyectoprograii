@@ -7,6 +7,10 @@ import com.proyecto.veterinaria.entity.Medico;
 import com.proyecto.veterinaria.entity.Usuarios;
 import com.proyecto.veterinaria.repository.CitaRepository;
 import org.springframework.stereotype.Service;
+import com.proyecto.veterinaria.exception.ReglaNegocioException;
+import com.proyecto.veterinaria.repository.ConsultaRepository;
+import com.proyecto.veterinaria.repository.DetalleCitaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,9 +19,15 @@ import java.util.stream.Collectors;
 public class CitaService {
 
     private final CitaRepository citaRepository;
+    private final ConsultaRepository consultaRepository;
+    private final DetalleCitaService detalleCitaService;
 
-    public CitaService(CitaRepository citaRepository) {
+    public CitaService(CitaRepository citaRepository,
+            ConsultaRepository consultaRepository,
+            DetalleCitaService detalleCitaService) {
         this.citaRepository = citaRepository;
+        this.consultaRepository = consultaRepository;
+        this.detalleCitaService = detalleCitaService;
     }
 
     public List<CitaDTO> findAll() {
@@ -28,25 +38,25 @@ public class CitaService {
     }
 
     public List<CitaDTO> filtroActivas() {
-    return citaRepository.findByEstadoTrueOrderByIdCitaDesc()
-            .stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-}
+        return citaRepository.findByEstadoTrueOrderByIdCitaDesc()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     public List<CitaDTO> filtroMascota(Integer idMascota) {
-    return citaRepository.findByIdMascota_IdMascota(idMascota)
-            .stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-}
+        return citaRepository.findByIdMascota_IdMascota(idMascota)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     public List<CitaDTO> filtroMedico(Integer idMedico) {
-    return citaRepository.findByIdMedico_IdMedico(idMedico)
-            .stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-}
+        return citaRepository.findByIdMedico_IdMedico(idMedico)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     public CitaDTO findById(Integer id) {
         Cita entity = citaRepository.findById(id)
@@ -67,14 +77,23 @@ public class CitaService {
         entity.setMotivo(dto.getMotivo());
         entity.setTotal(dto.getTotal());
         entity.setEstado(dto.getEstado());
-        if (dto.getIdMascota() != null) entity.setIdMascota(new Mascota(dto.getIdMascota()));
-        if (dto.getIdMedico() != null) entity.setIdMedico(new Medico(dto.getIdMedico()));
-        if (dto.getIdUsuario() != null) entity.setIdUsuario(new Usuarios(dto.getIdUsuario()));
+        if (dto.getIdMascota() != null)
+            entity.setIdMascota(new Mascota(dto.getIdMascota()));
+        if (dto.getIdMedico() != null)
+            entity.setIdMedico(new Medico(dto.getIdMedico()));
+        if (dto.getIdUsuario() != null)
+            entity.setIdUsuario(new Usuarios(dto.getIdUsuario()));
 
         return convertToDTO(citaRepository.save(entity));
     }
 
+    @Transactional
     public void eliminar(Integer id) {
+        if (consultaRepository.existsByIdCita_IdCita(id)) {
+            throw new ReglaNegocioException(
+                    "No se puede eliminar: la cita ya tiene consultas registradas. Use Anular.");
+        }
+        detalleCitaService.eliminarPorCita(id); // también devuelve su stock al inventario
         citaRepository.deleteById(id);
     }
 
@@ -91,9 +110,12 @@ public class CitaService {
         entity.setMotivo(dto.getMotivo());
         entity.setTotal(dto.getTotal());
         entity.setEstado(dto.getEstado());
-        if (dto.getIdMascota() != null) entity.setIdMascota(new Mascota(dto.getIdMascota()));
-        if (dto.getIdMedico() != null) entity.setIdMedico(new Medico(dto.getIdMedico()));
-        if (dto.getIdUsuario() != null) entity.setIdUsuario(new Usuarios(dto.getIdUsuario()));
+        if (dto.getIdMascota() != null)
+            entity.setIdMascota(new Mascota(dto.getIdMascota()));
+        if (dto.getIdMedico() != null)
+            entity.setIdMedico(new Medico(dto.getIdMedico()));
+        if (dto.getIdUsuario() != null)
+            entity.setIdUsuario(new Usuarios(dto.getIdUsuario()));
         return entity;
     }
 

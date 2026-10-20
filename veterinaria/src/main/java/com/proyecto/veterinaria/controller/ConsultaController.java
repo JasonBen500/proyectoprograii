@@ -56,17 +56,6 @@ public class ConsultaController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<MessageResponse> eliminar(@PathVariable Integer id) {
-        try {
-            consultaService.eliminar(id);
-            return ResponseEntity.ok(new MessageResponse("Consulta eliminada con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al eliminar la consulta"));
-        }
-    }
-
     @PatchMapping("/{id}/anular")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
         try {

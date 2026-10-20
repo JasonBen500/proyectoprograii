@@ -23,4 +23,6 @@ public class MedicoDTO {
 
     @NotNull(message = "El usuario es obligatorio")
     private Integer idUsuario;
+
+    private String nombreUsuario;
 }

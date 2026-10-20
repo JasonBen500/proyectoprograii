@@ -78,9 +78,6 @@ public class MascotaService {
         return convertToDTO(mascotaRepository.save(entity));
     }
 
-    public void eliminar(Integer id) {
-        mascotaRepository.deleteById(id);
-    }
 
     public MascotaDTO anular(Integer id) {
         Mascota entity = mascotaRepository.findById(id)
@@ -109,6 +106,7 @@ public class MascotaService {
         dto.setPeso(entity.getPeso());
         dto.setEstado(entity.getEstado());
         dto.setIdDueno(entity.getIdDueno() != null ? entity.getIdDueno().getIdDueno() : null);
+        dto.setNombreDueno(NombresUtil.dueno(entity.getIdDueno()));
         return dto;
     }
 }

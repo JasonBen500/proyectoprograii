@@ -28,4 +28,7 @@ public class CitaDTO {
 
     @NotNull(message = "El usuario es obligatorio")
     private Integer idUsuario;
+    private String nombreMascota;
+    private String nombreMedico;
+    private String nombreUsuario;
 }

@@ -17,4 +17,6 @@ public class ConsultaDTO {
 
     @NotNull(message = "La cita es obligatoria")
     private Integer idCita;
+
+    private String descripcionCita;
 }

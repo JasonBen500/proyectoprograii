@@ -25,4 +25,6 @@ public class UsuariosDTO {
 
     @NotNull(message = "El perfil es obligatorio")
     private Integer idPerfil;
+
+    private String nombrePerfil;
 }

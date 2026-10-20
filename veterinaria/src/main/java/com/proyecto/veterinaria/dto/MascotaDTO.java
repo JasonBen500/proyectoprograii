@@ -26,4 +26,6 @@ public class MascotaDTO {
 
     @NotNull(message = "El dueño es obligatorio")
     private Integer idDueno;
+
+    private String nombreDueno;
 }

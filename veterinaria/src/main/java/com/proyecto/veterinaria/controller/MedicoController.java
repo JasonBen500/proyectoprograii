@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/medicos")
-@CrossOrigin (origins = "http://localhost:5173/")
 public class MedicoController {
 
     private final MedicoService medicoService;
@@ -50,35 +49,20 @@ public class MedicoController {
 
     @PostMapping
     public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody MedicoDTO dto) {
-        try {
-            medicoService.agregar(dto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new MessageResponse("Medico creado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al crear el medico"));
-        }
+        medicoService.agregar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new MessageResponse("Medico creado con exito"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody MedicoDTO dto) {
-        try {
-            medicoService.modificar(id, dto);
-            return ResponseEntity.ok(new MessageResponse("Medico actualizado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al actualizar el medico"));
-        }
+    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @Valid @RequestBody MedicoDTO dto) {
+        medicoService.modificar(id, dto);
+        return ResponseEntity.ok(new MessageResponse("Medico actualizado con exito"));
     }
 
     @PatchMapping("/{id}/anular")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
-        try {
-            medicoService.anular(id);
-            return ResponseEntity.ok(new MessageResponse("Medico anulado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al anular el medico"));
-        }
+        medicoService.anular(id);
+        return ResponseEntity.ok(new MessageResponse("Medico anulado con exito"));
     }
 }

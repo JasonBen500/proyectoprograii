@@ -10,9 +10,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import io.jsonwebtoken.JwtException;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -27,8 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
@@ -38,22 +39,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 2. Extrae el token quitando "Bearer "
         String token = authHeader.substring(7);
-        String usuario = jwtService.extraerUsuario(token);
 
-        // 3. Si hay usuario y todavía no hay nadie autenticado en este request
-        if (usuario != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtService.tokenValido(token, usuario)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                usuario, null, Collections.emptyList());
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request));
+        try {
+            String usuario = jwtService.extraerUsuario(token);
 
-                // Le dice a Spring Security: "este usuario ya está autenticado"
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (usuario != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (jwtService.tokenValido(token, usuario)) {
+                    String rol = jwtService.extraerRol(token);
+                    List<SimpleGrantedAuthority> permisos = (rol == null || rol.isBlank())
+                            ? List.of()
+                            : List.of(new SimpleGrantedAuthority("ROLE_" + rol));
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            usuario, null, permisos);
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (JwtException | IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"mensaje\":\"Sesión expirada o token inválido\"}");
+            return;
         }
 
         filterChain.doFilter(request, response);

@@ -3,19 +3,18 @@ package com.proyecto.veterinaria.controller;
 import com.proyecto.veterinaria.dto.CitaDTO;
 import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.service.CitaService;
-import com.proyecto.veterinaria.exception.ReglaNegocioException;
 
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.proyecto.veterinaria.dto.HojaCitaDTO;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/citas")
-@CrossOrigin(origins = "http://localhost:5173/")
 public class CitaController {
 
     private final CitaService citaService;
@@ -49,51 +48,33 @@ public class CitaController {
         return citaService.findById(id);
     }
 
+    @GetMapping("/{id}/hoja")
+    public HojaCitaDTO hoja(@PathVariable Integer id) {
+        return citaService.hoja(id);
+    }
+
     @PostMapping
     public ResponseEntity<?> agregar(@Valid @RequestBody CitaDTO dto) {
-        try {
-            CitaDTO creado = citaService.crear(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(creado);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al crear la cita"));
-        }
+        CitaDTO creado = citaService.crear(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody CitaDTO dto) {
-        try {
-            citaService.modificar(id, dto);
-            return ResponseEntity.ok(new MessageResponse("Cita actualizada con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al actualizar la cita"));
-        }
+    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @Valid @RequestBody CitaDTO dto) {
+        citaService.modificar(id, dto);
+        return ResponseEntity.ok(new MessageResponse("Cita actualizada con exito"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<MessageResponse> eliminar(@PathVariable Integer id) {
-        try {
-            citaService.eliminar(id);
-            return ResponseEntity.ok(new MessageResponse("Cita eliminada con exito"));
+        citaService.eliminar(id);
+        return ResponseEntity.ok(new MessageResponse("Cita eliminada con exito"));
 
-        } catch (ReglaNegocioException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new MessageResponse(e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al eliminar la cita"));
-        }
     }
 
     @PatchMapping("/{id}/anular")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
-        try {
-            citaService.anular(id);
-            return ResponseEntity.ok(new MessageResponse("Cita anulada con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al anular la cita"));
-        }
+        citaService.anular(id);
+        return ResponseEntity.ok(new MessageResponse("Cita anulada con exito"));
     }
 }

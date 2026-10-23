@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/perfiles")
-@CrossOrigin (origins = "http://localhost:5173/")
 public class PerfilController {
 
     private final PerfilService perfilService;
@@ -35,37 +34,21 @@ public class PerfilController {
 
     @PostMapping
     public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody PerfilDTO dto) {
-        try {
-            perfilService.crear(dto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new MessageResponse("Perfil creado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al crear el perfil"));
-        }
+        perfilService.crear(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new MessageResponse("Perfil creado con exito"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody PerfilDTO dto) {
-        try {
-            perfilService.actualizar(id, dto);
-            return ResponseEntity.ok(new MessageResponse("Perfil actualizado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al actualizar el perfil"));
-        }
+    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @Valid @RequestBody PerfilDTO dto) {
+        perfilService.actualizar(id, dto);
+        return ResponseEntity.ok(new MessageResponse("Perfil actualizado con exito"));
     }
-
 
     @PatchMapping("/{id}/anular")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
-        try {
-            perfilService.anular(id);
-            return ResponseEntity.ok(new MessageResponse("Perfil anulado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al anular el perfil"));
-        }
+        perfilService.anular(id);
+        return ResponseEntity.ok(new MessageResponse("Perfil anulado con exito"));
     }
 
     @GetMapping("/activos")

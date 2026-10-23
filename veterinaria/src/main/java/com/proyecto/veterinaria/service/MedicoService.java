@@ -1,5 +1,7 @@
 package com.proyecto.veterinaria.service;
 
+import com.proyecto.veterinaria.exception.RecursoNoEncontradoException;
+
 import com.proyecto.veterinaria.dto.MedicoDTO;
 import com.proyecto.veterinaria.entity.Medico;
 import com.proyecto.veterinaria.entity.Usuarios;
@@ -19,21 +21,21 @@ public class MedicoService {
     }
 
     public List<MedicoDTO> filtroActivos() {
-    return medicoRepository.findByEstadoTrueOrderByIdMedicoDesc()
-            .stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        return medicoRepository.findByEstadoTrueOrderByIdMedicoDesc()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     public List<MedicoDTO> filtroEspecialidad(String especialidad) {
-    return medicoRepository.findByEspecialidadIgnoreCase(especialidad)
-            .stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        return medicoRepository.findByEspecialidadIgnoreCase(especialidad)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     public boolean Cedula(String cedula) {
-    return medicoRepository.existsByCedula(cedula);
+        return medicoRepository.existsByCedula(cedula);
     }
 
     public List<MedicoDTO> findAll() {
@@ -45,7 +47,7 @@ public class MedicoService {
 
     public MedicoDTO findById(Integer id) {
         Medico entity = medicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medico no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Medico no encontrado"));
         return convertToDTO(entity);
     }
 
@@ -56,21 +58,22 @@ public class MedicoService {
 
     public MedicoDTO modificar(Integer id, MedicoDTO dto) {
         Medico entity = medicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medico no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Medico no encontrado"));
 
         entity.setNombre(dto.getNombre());
         entity.setApellido(dto.getApellido());
         entity.setCedula(dto.getCedula());
         entity.setEspecialidad(dto.getEspecialidad());
         entity.setEstado(dto.getEstado());
-        if (dto.getIdUsuario() != null) entity.setIdUsuario(new Usuarios(dto.getIdUsuario()));
+        if (dto.getIdUsuario() != null)
+            entity.setIdUsuario(new Usuarios(dto.getIdUsuario()));
 
         return convertToDTO(medicoRepository.save(entity));
     }
 
     public MedicoDTO anular(Integer id) {
         Medico entity = medicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medico no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Medico no encontrado"));
         entity.setEstado(false);
         return convertToDTO(medicoRepository.save(entity));
     }
@@ -82,7 +85,8 @@ public class MedicoService {
         entity.setCedula(dto.getCedula());
         entity.setEspecialidad(dto.getEspecialidad());
         entity.setEstado(dto.getEstado());
-        if (dto.getIdUsuario() != null) entity.setIdUsuario(new Usuarios(dto.getIdUsuario()));
+        if (dto.getIdUsuario() != null)
+            entity.setIdUsuario(new Usuarios(dto.getIdUsuario()));
         return entity;
     }
 

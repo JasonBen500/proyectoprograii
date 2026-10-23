@@ -16,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
-@CrossOrigin(origins = "http://localhost:5173/")
 public class UsuariosController {
 
     private final UsuariosService usuariosService;
@@ -52,46 +51,26 @@ public class UsuariosController {
 
     @PostMapping
     public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody UsuariosDTO dto) {
-        try {
-            usuariosService.agregar(dto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new MessageResponse("Usuario creado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al crear el usuario"));
-        }
+        usuariosService.agregar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new MessageResponse("Usuario creado con exito"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody UsuariosDTO dto) {
-        try {
-            usuariosService.modificar(id, dto);
-            return ResponseEntity.ok(new MessageResponse("Usuario actualizado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al actualizar el usuario"));
-        }
+    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @Valid @RequestBody UsuariosDTO dto) {
+        usuariosService.modificar(id, dto);
+        return ResponseEntity.ok(new MessageResponse("Usuario actualizado con exito"));
     }
 
     @PatchMapping("/{id}/anular")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
-        try {
-            usuariosService.anular(id);
-            return ResponseEntity.ok(new MessageResponse("Usuario anulado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al anular el usuario"));
-        }
+        usuariosService.anular(id);
+        return ResponseEntity.ok(new MessageResponse("Usuario anulado con exito"));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO dto) {
-        try {
-            LoginResponseDTO respuesta = usuariosService.login(dto);
-            return ResponseEntity.ok(respuesta);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageResponse(e.getMessage()));
-        }
+        LoginResponseDTO respuesta = usuariosService.login(dto);
+        return ResponseEntity.ok(respuesta);
     }
 }

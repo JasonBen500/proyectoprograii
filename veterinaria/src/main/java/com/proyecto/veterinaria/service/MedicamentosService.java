@@ -1,5 +1,7 @@
 package com.proyecto.veterinaria.service;
 
+import com.proyecto.veterinaria.exception.RecursoNoEncontradoException;
+
 import com.proyecto.veterinaria.dto.MedicamentosDTO;
 import com.proyecto.veterinaria.entity.Medicamentos;
 import com.proyecto.veterinaria.repository.MedicamentosRepository;
@@ -32,7 +34,7 @@ public class MedicamentosService {
 
     public MedicamentosDTO findById(Integer id) {
         Medicamentos entity = medicamentosRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medicamento no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Medicamento no encontrado"));
         return convertToDTO(entity);
     }
 
@@ -43,7 +45,7 @@ public class MedicamentosService {
 
     public MedicamentosDTO actualizar(Integer id, MedicamentosDTO dto) {
         Medicamentos entity = medicamentosRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medicamento no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Medicamento no encontrado"));
 
         entity.setNombre(dto.getNombre());
         entity.setDescripcion(dto.getDescripcion());
@@ -64,7 +66,7 @@ public class MedicamentosService {
 
     public MedicamentosDTO anular(Integer id) {
         Medicamentos entity = medicamentosRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medicamento no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Medicamento no encontrado"));
         entity.setEstado(false);
         return convertToDTO(medicamentosRepository.save(entity));
     }
@@ -96,18 +98,17 @@ public class MedicamentosService {
 
     @Transactional
     public MedicamentosDTO ajustarStock(Integer id, Integer cambio) {
+        int filas = medicamentosRepository.ajustarStockAtomico(id, cambio);
+
         Medicamentos entity = medicamentosRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Medicamento no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Medicamento no encontrado"));
 
-        int actual = entity.getStock() == null ? 0 : entity.getStock();
-        int nuevoStock = actual + cambio;
-
-        if (nuevoStock < 0) {
+        if (filas == 0) {
+            int actual = entity.getStock() == null ? 0 : entity.getStock();
             throw new ReglaNegocioException(
                     "Stock insuficiente de " + entity.getNombre() + ": hay " + actual + " disponibles.");
         }
-        entity.setStock(nuevoStock);
-        return convertToDTO(medicamentosRepository.save(entity));
+        return convertToDTO(entity);
     }
 
     // Texto vacío = sin imagen
@@ -123,9 +124,6 @@ public class MedicamentosService {
         entity.setStock(dto.getStock());
         entity.setEstado(dto.getEstado());
         entity.setImagen(normalizarImagen(dto.getImagen()));
-        if (dto.getImagen() != null) {
-            entity.setImagen(normalizarImagen(dto.getImagen()));
-        }
         return entity;
     }
 

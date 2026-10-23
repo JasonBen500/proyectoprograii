@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/duenos")
-@CrossOrigin(origins = "http://localhost:5173/")
 public class DuenoController {
 
     private final DuenoService duenoService;
@@ -35,35 +34,20 @@ public class DuenoController {
 
     @PostMapping
     public ResponseEntity<?> agregar(@Valid @RequestBody DuenoDTO dto) {
-        try {
-            DuenoDTO creado = duenoService.crear(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(creado);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al crear el dueño"));
-        }
+        DuenoDTO creado = duenoService.crear(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
     @PutMapping("/modificar/{id}")
-    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody DuenoDTO dto) {
-        try {
-            duenoService.actualizar(id, dto);
-            return ResponseEntity.ok(new MessageResponse("Dueno actualizado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al actualizar el dueno"));
-        }
+    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @Valid @RequestBody DuenoDTO dto) {
+        duenoService.actualizar(id, dto);
+        return ResponseEntity.ok(new MessageResponse("Dueno actualizado con exito"));
     }
 
     @PatchMapping("/anular/{id}")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
-        try {
-            duenoService.anular(id);
-            return ResponseEntity.ok(new MessageResponse("Dueno anulado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al anular el dueno"));
-        }
+        duenoService.anular(id);
+        return ResponseEntity.ok(new MessageResponse("Dueno anulado con exito"));
     }
 
     @GetMapping("/activos")

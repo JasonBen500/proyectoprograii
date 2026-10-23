@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/mascotas")
-@CrossOrigin(origins = "http://localhost:5173/")
 public class MascotaController {
 
     private final MascotaService mascotaService;
@@ -55,34 +54,19 @@ public class MascotaController {
 
     @PostMapping
     public ResponseEntity<?> agregar(@Valid @RequestBody MascotaDTO dto) {
-        try {
-            MascotaDTO creado = mascotaService.agregar(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(creado);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al crear la mascota"));
-        }
+        MascotaDTO creado = mascotaService.agregar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody MascotaDTO dto) {
-        try {
-            mascotaService.modificar(id, dto);
-            return ResponseEntity.ok(new MessageResponse("Mascota actualizada con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al actualizar la mascota"));
-        }
+    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @Valid @RequestBody MascotaDTO dto) {
+        mascotaService.modificar(id, dto);
+        return ResponseEntity.ok(new MessageResponse("Mascota actualizada con exito"));
     }
 
     @PatchMapping("/{id}/anular")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
-        try {
-            mascotaService.anular(id);
-            return ResponseEntity.ok(new MessageResponse("Mascota anulada con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al anular la mascota"));
-        }
+        mascotaService.anular(id);
+        return ResponseEntity.ok(new MessageResponse("Mascota anulada con exito"));
     }
 }

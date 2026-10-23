@@ -1,5 +1,7 @@
 package com.proyecto.veterinaria.service;
 
+import com.proyecto.veterinaria.exception.RecursoNoEncontradoException;
+
 import com.proyecto.veterinaria.dto.DuenoDTO;
 import com.proyecto.veterinaria.entity.Dueno;
 import com.proyecto.veterinaria.repository.DuenoRepository;
@@ -38,23 +40,20 @@ public class DuenoService {
                 .collect(Collectors.toList());
     }
 
-
-    //BUSCAR EL TELEFONO DEL DUEÑO//
+    // BUSCAR EL TELEFONO DEL DUEÑO//
     public boolean existeTelefono(String telefono) {
         return duenoRepository.existsByTelefono(telefono);
     }
 
-
-    //BUSCAR POR NOMBRE Y APELLIDO JUNTOS PARA NO HACERLO POR SEPARADO//
+    // BUSCAR POR NOMBRE Y APELLIDO JUNTOS PARA NO HACERLO POR SEPARADO//
     public boolean existeNombreCompleto(String nombre, String apellido) {
         return duenoRepository.existsByNombreIgnoreCaseAndApellidoIgnoreCase(nombre, apellido);
     }
 
-
-    //BUSCAR ID DEL DUEÑO//
+    // BUSCAR ID DEL DUEÑO//
     public DuenoDTO findById(Integer id) {
         Dueno entity = duenoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Dueno no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Dueno no encontrado"));
         return convertToDTO(entity);
     }
 
@@ -65,7 +64,7 @@ public class DuenoService {
 
     public DuenoDTO actualizar(Integer id, DuenoDTO dto) {
         Dueno entity = duenoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Dueno no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Dueno no encontrado"));
 
         entity.setNombre(dto.getNombre());
         entity.setApellido(dto.getApellido());
@@ -76,10 +75,9 @@ public class DuenoService {
         return convertToDTO(duenoRepository.save(entity));
     }
 
-
     public DuenoDTO anular(Integer id) {
         Dueno entity = duenoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Dueno no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Dueno no encontrado"));
         entity.setEstado(false);
         return convertToDTO(duenoRepository.save(entity));
     }

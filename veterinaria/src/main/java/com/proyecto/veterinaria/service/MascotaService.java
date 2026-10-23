@@ -1,5 +1,7 @@
 package com.proyecto.veterinaria.service;
 
+import com.proyecto.veterinaria.exception.RecursoNoEncontradoException;
+
 import com.proyecto.veterinaria.dto.MascotaDTO;
 import com.proyecto.veterinaria.entity.Mascota;
 import com.proyecto.veterinaria.entity.Dueno;
@@ -19,31 +21,31 @@ public class MascotaService {
     }
 
     public List<MascotaDTO> filtroActivas() {
-    return mascotaRepository.findByEstadoTrueOrderByIdMascotaDesc()
-            .stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        return mascotaRepository.findByEstadoTrueOrderByIdMascotaDesc()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     public List<MascotaDTO> filtroIdDueno(Integer idDueno) {
-    return mascotaRepository.findByIdDueno_IdDueno(idDueno)
-            .stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        return mascotaRepository.findByIdDueno_IdDueno(idDueno)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     public List<MascotaDTO> filtroEspecie(String especie) {
-    return mascotaRepository.findByEspecieIgnoreCase(especie)
-            .stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        return mascotaRepository.findByEspecieIgnoreCase(especie)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     public List<MascotaDTO> filtroNombre(String nombre) {
-    return mascotaRepository.findByNombreContainingIgnoreCase(nombre)
-            .stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        return mascotaRepository.findByNombreContainingIgnoreCase(nombre)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     public List<MascotaDTO> findAll() {
@@ -55,7 +57,7 @@ public class MascotaService {
 
     public MascotaDTO findById(Integer id) {
         Mascota entity = mascotaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mascota no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Mascota no encontrada"));
         return convertToDTO(entity);
     }
 
@@ -66,22 +68,22 @@ public class MascotaService {
 
     public MascotaDTO modificar(Integer id, MascotaDTO dto) {
         Mascota entity = mascotaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mascota no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Mascota no encontrada"));
 
         entity.setNombre(dto.getNombre());
         entity.setEspecie(dto.getEspecie());
         entity.setEdad(dto.getEdad());
         entity.setPeso(dto.getPeso());
         entity.setEstado(dto.getEstado());
-        if (dto.getIdDueno() != null) entity.setIdDueno(new Dueno(dto.getIdDueno()));
+        if (dto.getIdDueno() != null)
+            entity.setIdDueno(new Dueno(dto.getIdDueno()));
 
         return convertToDTO(mascotaRepository.save(entity));
     }
 
-
     public MascotaDTO anular(Integer id) {
         Mascota entity = mascotaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mascota no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Mascota no encontrada"));
         entity.setEstado(false);
         return convertToDTO(mascotaRepository.save(entity));
     }
@@ -93,7 +95,8 @@ public class MascotaService {
         entity.setEdad(dto.getEdad());
         entity.setPeso(dto.getPeso());
         entity.setEstado(dto.getEstado());
-        if (dto.getIdDueno() != null) entity.setIdDueno(new Dueno(dto.getIdDueno()));
+        if (dto.getIdDueno() != null)
+            entity.setIdDueno(new Dueno(dto.getIdDueno()));
         return entity;
     }
 

@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/tratamientos")
-@CrossOrigin (origins = "http://localhost:5173/")
 public class TratamientoController {
 
     private final TratamientoService tratamientoService;
@@ -35,37 +34,22 @@ public class TratamientoController {
 
     @PostMapping
     public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody TratamientoDTO dto) {
-        try {
-            tratamientoService.crear(dto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new MessageResponse("Tratamiento creado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al crear el tratamiento"));
-        }
+        tratamientoService.crear(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new MessageResponse("Tratamiento creado con exito"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody TratamientoDTO dto) {
-        try {
-            tratamientoService.actualizar(id, dto);
-            return ResponseEntity.ok(new MessageResponse("Tratamiento actualizado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al actualizar el tratamiento"));
-        }
+      public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @Valid @RequestBody TratamientoDTO dto) {
+        tratamientoService.actualizar(id, dto);
+        return ResponseEntity.ok(new MessageResponse("Tratamiento actualizado con exito"));
     }
 
 
     @PatchMapping("/{id}/anular")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
-        try {
-            tratamientoService.anular(id);
-            return ResponseEntity.ok(new MessageResponse("Tratamiento anulado con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al anular el tratamiento"));
-        }
+        tratamientoService.anular(id);
+        return ResponseEntity.ok(new MessageResponse("Tratamiento anulado con exito"));
     }
 
     @GetMapping("/activos")

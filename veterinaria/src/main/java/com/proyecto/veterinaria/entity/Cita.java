@@ -19,6 +19,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 
@@ -29,7 +30,7 @@ import java.util.Date;
 @Entity
 @Table(name = "cita")
 @NamedQueries({
-    @NamedQuery(name = "Cita.findAll", query = "SELECT c FROM Cita c")})
+        @NamedQuery(name = "Cita.findAll", query = "SELECT c FROM Cita c") })
 public class Cita implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -44,7 +45,7 @@ public class Cita implements Serializable {
     @Column(name = "MOTIVO")
     private String motivo;
     @Column(name = "TOTAL")
-    private Long total;
+    private BigDecimal total;
     @Column(name = "ESTADO")
     private Boolean estado;
     @OneToMany(mappedBy = "idCita")
@@ -92,11 +93,11 @@ public class Cita implements Serializable {
         this.motivo = motivo;
     }
 
-    public Long getTotal() {
+    public BigDecimal getTotal() {
         return total;
     }
 
-    public void setTotal(Long total) {
+    public void setTotal(BigDecimal total) {
         this.total = total;
     }
 
@@ -162,7 +163,8 @@ public class Cita implements Serializable {
             return false;
         }
         Cita other = (Cita) object;
-        if ((this.idCita == null && other.idCita != null) || (this.idCita != null && !this.idCita.equals(other.idCita))) {
+        if ((this.idCita == null && other.idCita != null)
+                || (this.idCita != null && !this.idCita.equals(other.idCita))) {
             return false;
         }
         return true;
@@ -172,5 +174,5 @@ public class Cita implements Serializable {
     public String toString() {
         return "com.proyecto.veterinaria.entity.Cita[ idCita=" + idCita + " ]";
     }
-    
+
 }

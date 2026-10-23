@@ -1,5 +1,7 @@
 package com.proyecto.veterinaria.service;
 
+import com.proyecto.veterinaria.exception.RecursoNoEncontradoException;
+
 import com.proyecto.veterinaria.dto.TratamientoDTO;
 import com.proyecto.veterinaria.entity.Tratamiento;
 import com.proyecto.veterinaria.repository.TratamientoRepository;
@@ -26,7 +28,7 @@ public class TratamientoService {
 
     public TratamientoDTO findById(Integer id) {
         Tratamiento entity = tratamientoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tratamiento no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Tratamiento no encontrado"));
         return convertToDTO(entity);
     }
 
@@ -37,7 +39,7 @@ public class TratamientoService {
 
     public TratamientoDTO actualizar(Integer id, TratamientoDTO dto) {
         Tratamiento entity = tratamientoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tratamiento no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Tratamiento no encontrado"));
 
         entity.setNombre(dto.getNombre());
         entity.setPrecio(dto.getPrecio());
@@ -46,10 +48,9 @@ public class TratamientoService {
         return convertToDTO(tratamientoRepository.save(entity));
     }
 
-
     public TratamientoDTO anular(Integer id) {
         Tratamiento entity = tratamientoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tratamiento no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Tratamiento no encontrado"));
         entity.setEstado(false);
         return convertToDTO(tratamientoRepository.save(entity));
     }

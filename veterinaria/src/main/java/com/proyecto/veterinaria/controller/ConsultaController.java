@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/consultas")
-@CrossOrigin (origins = "http://localhost:5173/")
 public class ConsultaController {
 
     private final ConsultaService consultaService;
@@ -35,36 +34,21 @@ public class ConsultaController {
 
     @PostMapping
     public ResponseEntity<MessageResponse> agregar(@Valid @RequestBody ConsultaDTO dto) {
-        try {
-            consultaService.crear(dto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new MessageResponse("Consulta creada con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al crear la consulta"));
-        }
+        consultaService.crear(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new MessageResponse("Consulta creada con exito"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MessageResponse> modificar(@Valid @PathVariable Integer id, @RequestBody ConsultaDTO dto) {
-        try {
-            consultaService.actualizar(id, dto);
-            return ResponseEntity.ok(new MessageResponse("Consulta actualizada con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al actualizar la consulta"));
-        }
+    public ResponseEntity<MessageResponse> modificar(@PathVariable Integer id, @Valid @RequestBody ConsultaDTO dto) {
+        consultaService.actualizar(id, dto);
+        return ResponseEntity.ok(new MessageResponse("Consulta actualizada con exito"));
     }
 
     @PatchMapping("/{id}/anular")
     public ResponseEntity<MessageResponse> anular(@PathVariable Integer id) {
-        try {
-            consultaService.anular(id);
-            return ResponseEntity.ok(new MessageResponse("Consulta anulada con exito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error al anular la consulta"));
-        }
+        consultaService.anular(id);
+        return ResponseEntity.ok(new MessageResponse("Consulta anulada con exito"));
     }
 
     @GetMapping("/activas")

@@ -1,5 +1,7 @@
 package com.proyecto.veterinaria.service;
 
+import com.proyecto.veterinaria.exception.RecursoNoEncontradoException;
+
 import com.proyecto.veterinaria.dto.PerfilDTO;
 import com.proyecto.veterinaria.entity.Perfil;
 import com.proyecto.veterinaria.repository.PerfilRepository;
@@ -26,7 +28,7 @@ public class PerfilService {
 
     public PerfilDTO findById(Integer id) {
         Perfil entity = perfilRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Perfil no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Perfil no encontrado"));
         return convertToDTO(entity);
     }
 
@@ -37,7 +39,7 @@ public class PerfilService {
 
     public PerfilDTO actualizar(Integer id, PerfilDTO dto) {
         Perfil entity = perfilRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Perfil no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Perfil no encontrado"));
 
         entity.setNombrePerfil(dto.getNombrePerfil());
         entity.setEstado(dto.getEstado());
@@ -45,10 +47,9 @@ public class PerfilService {
         return convertToDTO(perfilRepository.save(entity));
     }
 
-
     public PerfilDTO anular(Integer id) {
         Perfil entity = perfilRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Perfil no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Perfil no encontrado"));
         entity.setEstado(false);
         return convertToDTO(perfilRepository.save(entity));
     }
@@ -62,7 +63,7 @@ public class PerfilService {
 
     public PerfilDTO findByNombre(String nombrePerfil) {
         Perfil entity = perfilRepository.findByNombrePerfilIgnoreCase(nombrePerfil)
-                .orElseThrow(() -> new RuntimeException("Perfil no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Perfil no encontrado"));
         return convertToDTO(entity);
     }
 

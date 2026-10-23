@@ -1,5 +1,6 @@
 package com.proyecto.veterinaria.dto;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -14,9 +15,8 @@ public class CitaDTO {
     @NotBlank(message = "El motivo es obligatorio")
     private String motivo;
 
-    @NotNull(message = "El total es obligatorio")
-    @Min(value = 0, message = "El total no puede ser negativo")
-    private Long total;
+    // Lo calcula el servidor a partir de los detalles; el valor enviado se ignora
+    private BigDecimal total;
 
     private Boolean estado;
 

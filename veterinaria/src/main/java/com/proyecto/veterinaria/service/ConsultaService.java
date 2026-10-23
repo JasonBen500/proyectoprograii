@@ -1,5 +1,7 @@
 package com.proyecto.veterinaria.service;
 
+import com.proyecto.veterinaria.exception.RecursoNoEncontradoException;
+
 import com.proyecto.veterinaria.dto.ConsultaDTO;
 import com.proyecto.veterinaria.entity.Consulta;
 import com.proyecto.veterinaria.entity.Cita;
@@ -18,8 +20,7 @@ public class ConsultaService {
         this.consultaRepository = consultaRepository;
     }
 
-
-    //ENCONTRAR A TODOS
+    // ENCONTRAR A TODOS
     public List<ConsultaDTO> findAll() {
         return consultaRepository.findAll()
                 .stream()
@@ -27,7 +28,7 @@ public class ConsultaService {
                 .collect(Collectors.toList());
     }
 
-    //ENCONTRAR A LOS ACTIVOS
+    // ENCONTRAR A LOS ACTIVOS
     public List<ConsultaDTO> findActivas() {
         return consultaRepository.findByEstadoTrueOrderByIdConsultaDesc()
                 .stream()
@@ -35,7 +36,7 @@ public class ConsultaService {
                 .collect(Collectors.toList());
     }
 
-    //FILTRO DE CITAS
+    // FILTRO DE CITAS
     public List<ConsultaDTO> findByCita(Integer idCita) {
         return consultaRepository.findByIdCita_IdCita(idCita)
                 .stream()
@@ -43,8 +44,7 @@ public class ConsultaService {
                 .collect(Collectors.toList());
     }
 
-
-    //FFILTRO DE DIAGNOSTICO
+    // FFILTRO DE DIAGNOSTICO
     public List<ConsultaDTO> buscarPorDiagnostico(String diagnostico) {
         return consultaRepository.findByDiagnosticoContainingIgnoreCase(diagnostico)
                 .stream()
@@ -52,10 +52,10 @@ public class ConsultaService {
                 .collect(Collectors.toList());
     }
 
-    //FILTRO DE ID
+    // FILTRO DE ID
     public ConsultaDTO findById(Integer id) {
         Consulta entity = consultaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Consulta no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Consulta no encontrada"));
         return convertToDTO(entity);
     }
 
@@ -66,7 +66,7 @@ public class ConsultaService {
 
     public ConsultaDTO actualizar(Integer id, ConsultaDTO dto) {
         Consulta entity = consultaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Consulta no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Consulta no encontrada"));
 
         entity.setDiagnostico(dto.getDiagnostico());
         entity.setSintomas(dto.getSintomas());
@@ -79,7 +79,7 @@ public class ConsultaService {
 
     public ConsultaDTO anular(Integer id) {
         Consulta entity = consultaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Consulta no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Consulta no encontrada"));
         entity.setEstado(false);
         return convertToDTO(consultaRepository.save(entity));
     }

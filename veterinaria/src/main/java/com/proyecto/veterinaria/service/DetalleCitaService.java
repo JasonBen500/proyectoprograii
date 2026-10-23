@@ -1,14 +1,18 @@
 package com.proyecto.veterinaria.service;
 
+import com.proyecto.veterinaria.exception.RecursoNoEncontradoException;
+
 import com.proyecto.veterinaria.dto.DetalleCitaDTO;
 import com.proyecto.veterinaria.entity.DetalleCita;
 import com.proyecto.veterinaria.entity.Cita;
 import com.proyecto.veterinaria.entity.Medicamentos;
 import com.proyecto.veterinaria.entity.Tratamiento;
+import com.proyecto.veterinaria.repository.CitaRepository;
 import com.proyecto.veterinaria.repository.DetalleCitaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,11 +21,29 @@ public class DetalleCitaService {
 
     private final DetalleCitaRepository detalleCitaRepository;
     private final MedicamentosService medicamentosService;
+    private final CitaRepository citaRepository;
 
     public DetalleCitaService(DetalleCitaRepository detalleCitaRepository,
-            MedicamentosService medicamentosService) {
+            MedicamentosService medicamentosService,
+            CitaRepository citaRepository) {
         this.detalleCitaRepository = detalleCitaRepository;
         this.medicamentosService = medicamentosService;
+        this.citaRepository = citaRepository;
+    }
+
+    // El total de la cita siempre es la suma de sus detalles activos
+    private void recalcularTotal(Integer idCita) {
+        if (idCita == null) {
+            return;
+        }
+        citaRepository.findById(idCita).ifPresent(cita -> {
+            BigDecimal total = detalleCitaRepository.findByIdCita_IdCita(idCita).stream()
+                    .filter(d -> Boolean.TRUE.equals(d.getEstado()) && d.getPrecioAplicado() != null)
+                    .map(d -> d.getPrecioAplicado().multiply(BigDecimal.valueOf(cantidadDe(d))))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            cita.setTotal(total);
+            citaRepository.save(cita);
+        });
     }
 
     public List<DetalleCitaDTO> findAll() {
@@ -65,19 +87,25 @@ public class DetalleCitaService {
     // BUSCAR LOS DETALLES DE LA CITA//
     public DetalleCitaDTO findById(Integer id) {
         DetalleCita entity = detalleCitaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("DetalleCita no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("DetalleCita no encontrado"));
         return convertToDTO(entity);
     }
 
+    @Transactional
     public DetalleCitaDTO crear(DetalleCitaDTO dto) {
         DetalleCita entity = convertToEntity(dto);
-        return convertToDTO(detalleCitaRepository.save(entity));
+        DetalleCita guardado = detalleCitaRepository.save(entity);
+        descontarInventario(guardado);
+        recalcularTotal(dto.getIdCita());
+        return convertToDTO(guardado);
     }
 
     @Transactional
     public DetalleCitaDTO actualizar(Integer id, DetalleCitaDTO dto) {
         DetalleCita entity = detalleCitaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("DetalleCita no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("DetalleCita no encontrado"));
+
+        Integer citaAnterior = entity.getIdCita() != null ? entity.getIdCita().getIdCita() : null;
 
         // Devuelve al inventario lo que consumía antes de editar
         reponerInventario(entity);
@@ -96,16 +124,20 @@ public class DetalleCitaService {
 
         // Descuenta lo que consume ahora
         descontarInventario(guardado);
+        recalcularTotal(citaAnterior);
+        recalcularTotal(guardado.getIdCita() != null ? guardado.getIdCita().getIdCita() : null);
         return convertToDTO(guardado);
     }
 
     @Transactional
     public DetalleCitaDTO anular(Integer id) {
         DetalleCita entity = detalleCitaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("DetalleCita no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("DetalleCita no encontrado"));
         reponerInventario(entity); // antes de marcarlo como anulado
         entity.setEstado(false);
-        return convertToDTO(detalleCitaRepository.save(entity));
+        DetalleCita guardado = detalleCitaRepository.save(entity);
+        recalcularTotal(guardado.getIdCita() != null ? guardado.getIdCita().getIdCita() : null);
+        return convertToDTO(guardado);
     }
 
     @Transactional
@@ -117,8 +149,12 @@ public class DetalleCitaService {
 
     @Transactional
     public void eliminar(Integer id) {
-        detalleCitaRepository.findById(id).ifPresent(this::reponerInventario);
+        Integer idCita = detalleCitaRepository.findById(id).map(d -> {
+            reponerInventario(d);
+            return d.getIdCita() != null ? d.getIdCita().getIdCita() : null;
+        }).orElse(null);
         detalleCitaRepository.deleteById(id);
+        recalcularTotal(idCita);
     }
 
     private DetalleCita convertToEntity(DetalleCitaDTO dto) {

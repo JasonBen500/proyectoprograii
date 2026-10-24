@@ -24,12 +24,17 @@ public class UsuariosService {
     private final UsuariosRepository usuariosRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final LoginAttemptService loginAttemptService;
+    private final HistorialService historialService;
 
     public UsuariosService(UsuariosRepository usuariosRepository, JwtService jwtService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService,
+            HistorialService historialService) {
         this.usuariosRepository = usuariosRepository;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
+        this.loginAttemptService = loginAttemptService;
+        this.historialService = historialService;
     }
 
     private boolean esHashBcrypt(String valor) {
@@ -66,7 +71,7 @@ public class UsuariosService {
 
     public UsuariosDTO agregar(UsuariosDTO dto) {
         if (dto.getContrasena() == null || dto.getContrasena().isBlank()) {
-            throw new RuntimeException("La contraseña es obligatoria");
+            throw new IllegalArgumentException("La contraseña es obligatoria");
         }
         if (usuariosRepository.existsByUsuario(dto.getUsuario())) {
             throw new ReglaNegocioException("El nombre de usuario ya existe");
@@ -76,12 +81,21 @@ public class UsuariosService {
         }
         Usuarios entity = convertToEntity(dto);
         entity.setContrasena(passwordEncoder.encode(dto.getContrasena()));
-        return convertToDTO(usuariosRepository.save(entity));
+        Usuarios guardado = usuariosRepository.save(entity);
+        historialService.registrar("CREAR", "Usuario", "Se agregó al usuario " + guardado.getUsuario());
+        return convertToDTO(guardado);
     }
 
     public UsuariosDTO modificar(Integer id, UsuariosDTO dto) {
         Usuarios entity = usuariosRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+
+        if (usuariosRepository.existsByUsuarioAndIdUsuarioNot(dto.getUsuario(), id)) {
+            throw new ReglaNegocioException("El nombre de usuario ya existe");
+        }
+        if (usuariosRepository.existsByCorreoAndIdUsuarioNot(dto.getCorreo(), id)) {
+            throw new ReglaNegocioException("El correo ya está registrado");
+        }
 
         entity.setNombre(dto.getNombre());
         entity.setUsuario(dto.getUsuario());
@@ -93,14 +107,18 @@ public class UsuariosService {
         if (dto.getIdPerfil() != null)
             entity.setIdPerfil(new Perfil(dto.getIdPerfil()));
 
-        return convertToDTO(usuariosRepository.save(entity));
+        Usuarios guardado = usuariosRepository.save(entity);
+        historialService.registrar("MODIFICAR", "Usuario", "Se modificó al usuario " + guardado.getUsuario());
+        return convertToDTO(guardado);
     }
 
     public UsuariosDTO anular(Integer id) {
         Usuarios entity = usuariosRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
         entity.setEstado(false);
-        return convertToDTO(usuariosRepository.save(entity));
+        Usuarios guardado = usuariosRepository.save(entity);
+        historialService.registrar("ANULAR", "Usuario", "Se anuló al usuario " + guardado.getUsuario());
+        return convertToDTO(guardado);
     }
 
     private Usuarios convertToEntity(UsuariosDTO dto) {
@@ -127,7 +145,21 @@ public class UsuariosService {
         return dto;
     }
 
-    public LoginResponseDTO login(LoginRequestDTO dto) {
+    // Limita los intentos fallidos por usuario + IP
+    public LoginResponseDTO login(LoginRequestDTO dto, String ip) {
+        String clave = LoginAttemptService.clave(dto.getUsuario(), ip);
+        loginAttemptService.verificarNoBloqueado(clave);
+        try {
+            LoginResponseDTO respuesta = autenticar(dto);
+            loginAttemptService.limpiar(clave);
+            return respuesta;
+        } catch (CredencialesInvalidasException e) {
+            loginAttemptService.registrarFallo(clave);
+            throw e;
+        }
+    }
+
+    private LoginResponseDTO autenticar(LoginRequestDTO dto) {
         Usuarios entity = usuariosRepository.findByUsuario(dto.getUsuario())
                 .orElseThrow(() -> new CredencialesInvalidasException("Usuario o contraseña incorrectos"));
 

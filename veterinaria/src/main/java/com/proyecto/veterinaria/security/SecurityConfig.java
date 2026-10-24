@@ -69,6 +69,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/usuarios/**", "/perfiles/**").hasRole(rolAdmin)
                         .requestMatchers(HttpMethod.PATCH, "/usuarios/**", "/perfiles/**").hasRole(rolAdmin)
                         .requestMatchers(HttpMethod.DELETE, "/usuarios/**", "/perfiles/**").hasRole(rolAdmin)
+                        // Eliminar registros (el resto de perfiles crea, edita y anula)
+                        .requestMatchers(HttpMethod.DELETE, "/**").hasRole(rolAdmin)
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -79,7 +81,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(origenPermitido));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

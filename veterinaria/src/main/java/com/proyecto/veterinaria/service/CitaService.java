@@ -1,7 +1,6 @@
 package com.proyecto.veterinaria.service;
 
 import com.proyecto.veterinaria.exception.RecursoNoEncontradoException;
-
 import com.proyecto.veterinaria.dto.CitaDTO;
 import com.proyecto.veterinaria.entity.Cita;
 import com.proyecto.veterinaria.entity.Mascota;
@@ -12,13 +11,15 @@ import org.springframework.stereotype.Service;
 import com.proyecto.veterinaria.exception.ReglaNegocioException;
 import com.proyecto.veterinaria.repository.ConsultaRepository;
 import com.proyecto.veterinaria.repository.DetalleCitaRepository;
+import com.proyecto.veterinaria.repository.MedicoRepository;
 import org.springframework.transaction.annotation.Transactional;
 import com.proyecto.veterinaria.dto.HojaCitaDTO;
 import com.proyecto.veterinaria.dto.HojaLineaDTO;
-import java.math.BigDecimal;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,15 +29,23 @@ public class CitaService {
     private final ConsultaRepository consultaRepository;
     private final DetalleCitaService detalleCitaService;
     private final DetalleCitaRepository detalleCitaRepository;
+    private final MedicoRepository medicoRepository;
+
+    // SOLUCIÓN: Se agregó la declaración de HistorialService que faltaba
+    private final HistorialService historialService;
 
     public CitaService(CitaRepository citaRepository,
             ConsultaRepository consultaRepository,
             DetalleCitaService detalleCitaService,
-            DetalleCitaRepository detalleCitaRepository) {
+            DetalleCitaRepository detalleCitaRepository,
+            MedicoRepository medicoRepository,
+            HistorialService historialService) {
         this.citaRepository = citaRepository;
+        this.historialService = historialService;
         this.consultaRepository = consultaRepository;
         this.detalleCitaService = detalleCitaService;
         this.detalleCitaRepository = detalleCitaRepository;
+        this.medicoRepository = medicoRepository;
     }
 
     public List<CitaDTO> findAll() {
@@ -100,13 +109,31 @@ public class CitaService {
         }
     }
 
-    public CitaDTO crear(CitaDTO dto) {
-        validarAgenda(dto, null, true);
-        Cita entity = convertToEntity(dto);
-        return convertToDTO(citaRepository.save(entity));
+    // Bloquea al médico antes de revisar su agenda: así dos peticiones simultáneas
+    // no pueden agendar el mismo horario. Debe llamarse al inicio de la
+    // transacción.
+    private void bloquearMedico(Integer idMedico) {
+        if (idMedico == null) {
+            return;
+        }
+        medicoRepository.bloquearPorId(idMedico)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Médico no encontrado"));
     }
 
+    @Transactional
+    public CitaDTO crear(CitaDTO dto) {
+        bloquearMedico(dto.getIdMedico());
+        validarAgenda(dto, null, true);
+        Cita entity = convertToEntity(dto);
+        Cita guardada = citaRepository.save(entity);
+        historialService.registrar("CREAR", "Cita",
+                "Se agendó la cita" + descripcion(guardada.getIdCita()));
+        return convertToDTO(guardada);
+    }
+
+    @Transactional
     public CitaDTO modificar(Integer id, CitaDTO dto) {
+        bloquearMedico(dto.getIdMedico());
         Cita entity = citaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Cita no encontrada"));
 
@@ -123,7 +150,10 @@ public class CitaService {
         if (dto.getIdUsuario() != null)
             entity.setIdUsuario(new Usuarios(dto.getIdUsuario()));
 
-        return convertToDTO(citaRepository.save(entity));
+        Cita guardada = citaRepository.save(entity);
+        historialService.registrar("MODIFICAR", "Cita",
+                "Se modificó la cita" + descripcion(guardada.getIdCita()));
+        return convertToDTO(guardada);
     }
 
     @Transactional
@@ -133,14 +163,32 @@ public class CitaService {
                     "No se puede eliminar: la cita ya tiene consultas registradas. Use Anular.");
         }
         detalleCitaService.eliminarPorCita(id); // también devuelve su stock al inventario
+        String etiqueta = descripcion(id);
         citaRepository.deleteById(id);
+        historialService.registrar("ELIMINAR", "Cita", "Se eliminó la cita" + etiqueta);
     }
 
+    // Anular una cita anula también sus detalles y devuelve el stock al inventario
+    @Transactional
     public CitaDTO anular(Integer id) {
+        if (!citaRepository.existsById(id)) {
+            throw new RecursoNoEncontradoException("Cita no encontrada");
+        }
+        // Primero los detalles: recalculan el total y la cita se carga después ya
+        // actualizada
+        detalleCitaService.anularPorCita(id);
         Cita entity = citaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Cita no encontrada"));
         entity.setEstado(false);
-        return convertToDTO(citaRepository.save(entity));
+        Cita guardada = citaRepository.save(entity);
+        historialService.registrar("ANULAR", "Cita",
+                "Se anuló la cita" + descripcion(guardada.getIdCita()));
+        return convertToDTO(guardada);
+    }
+
+    // " de Firulais (20/10/2026 10:30)": la cita descrita por su paciente, sin mostrar ids
+    private String descripcion(Integer idCita) {
+        return Objects.toString(historialService.describirCita(idCita), "");
     }
 
     public HojaCitaDTO hoja(Integer id) {
@@ -188,10 +236,13 @@ public class CitaService {
                     } else if (d.getIdTratamiento() != null) {
                         linea.setTipo("Tratamiento");
                         linea.setDescripcion(d.getIdTratamiento().getNombre());
+                    } else {
+                        linea.setTipo("Detalle");
                     }
+                    BigDecimal precio = d.getPrecioAplicado() != null ? d.getPrecioAplicado() : BigDecimal.ZERO;
                     linea.setCantidad(cantidad);
-                    linea.setPrecioUnitario(d.getPrecioAplicado());
-                    linea.setSubtotal(d.getPrecioAplicado().multiply(BigDecimal.valueOf(cantidad)));
+                    linea.setPrecioUnitario(precio);
+                    linea.setSubtotal(precio.multiply(BigDecimal.valueOf(cantidad)));
                     return linea;
                 })
                 .collect(Collectors.toList());
@@ -229,6 +280,9 @@ public class CitaService {
         dto.setIdMascota(entity.getIdMascota() != null ? entity.getIdMascota().getIdMascota() : null);
         dto.setIdMedico(entity.getIdMedico() != null ? entity.getIdMedico().getIdMedico() : null);
         dto.setIdUsuario(entity.getIdUsuario() != null ? entity.getIdUsuario().getIdUsuario() : null);
+        dto.setNombreMascota(NombresUtil.mascota(entity.getIdMascota()));
+        dto.setNombreMedico(NombresUtil.medico(entity.getIdMedico()));
+        dto.setNombreUsuario(NombresUtil.usuario(entity.getIdUsuario()));
         return dto;
     }
 }

@@ -15,9 +15,11 @@ import java.util.stream.Collectors;
 public class MedicoService {
 
     private final MedicoRepository medicoRepository;
+    private final HistorialService historialService;
 
-    public MedicoService(MedicoRepository medicoRepository) {
+    public MedicoService(MedicoRepository medicoRepository, HistorialService historialService) {
         this.medicoRepository = medicoRepository;
+        this.historialService = historialService;
     }
 
     public List<MedicoDTO> filtroActivos() {
@@ -53,7 +55,10 @@ public class MedicoService {
 
     public MedicoDTO agregar(MedicoDTO dto) {
         Medico entity = convertToEntity(dto);
-        return convertToDTO(medicoRepository.save(entity));
+        Medico guardado = medicoRepository.save(entity);
+        historialService.registrar("CREAR", "Médico",
+                "Se agregó al médico " + guardado.getNombre() + " " + guardado.getApellido());
+        return convertToDTO(guardado);
     }
 
     public MedicoDTO modificar(Integer id, MedicoDTO dto) {
@@ -68,14 +73,20 @@ public class MedicoService {
         if (dto.getIdUsuario() != null)
             entity.setIdUsuario(new Usuarios(dto.getIdUsuario()));
 
-        return convertToDTO(medicoRepository.save(entity));
+        Medico guardado = medicoRepository.save(entity);
+        historialService.registrar("MODIFICAR", "Médico",
+                "Se modificó al médico " + guardado.getNombre() + " " + guardado.getApellido());
+        return convertToDTO(guardado);
     }
 
     public MedicoDTO anular(Integer id) {
         Medico entity = medicoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Medico no encontrado"));
         entity.setEstado(false);
-        return convertToDTO(medicoRepository.save(entity));
+        Medico guardado = medicoRepository.save(entity);
+        historialService.registrar("ANULAR", "Médico",
+                "Se anuló al médico " + guardado.getNombre() + " " + guardado.getApellido());
+        return convertToDTO(guardado);
     }
 
     private Medico convertToEntity(MedicoDTO dto) {

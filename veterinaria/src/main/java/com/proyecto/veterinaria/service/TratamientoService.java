@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 public class TratamientoService {
 
     private final TratamientoRepository tratamientoRepository;
+    private final HistorialService historialService;
 
-    public TratamientoService(TratamientoRepository tratamientoRepository) {
+    public TratamientoService(TratamientoRepository tratamientoRepository, HistorialService historialService) {
         this.tratamientoRepository = tratamientoRepository;
+        this.historialService = historialService;
     }
 
     public List<TratamientoDTO> findAll() {
@@ -34,7 +36,9 @@ public class TratamientoService {
 
     public TratamientoDTO crear(TratamientoDTO dto) {
         Tratamiento entity = convertToEntity(dto);
-        return convertToDTO(tratamientoRepository.save(entity));
+        Tratamiento guardado = tratamientoRepository.save(entity);
+        historialService.registrar("CREAR", "Tratamiento", "Se agregó el tratamiento " + guardado.getNombre());
+        return convertToDTO(guardado);
     }
 
     public TratamientoDTO actualizar(Integer id, TratamientoDTO dto) {
@@ -45,14 +49,18 @@ public class TratamientoService {
         entity.setPrecio(dto.getPrecio());
         entity.setEstado(dto.getEstado());
 
-        return convertToDTO(tratamientoRepository.save(entity));
+        Tratamiento guardado = tratamientoRepository.save(entity);
+        historialService.registrar("MODIFICAR", "Tratamiento", "Se modificó el tratamiento " + guardado.getNombre());
+        return convertToDTO(guardado);
     }
 
     public TratamientoDTO anular(Integer id) {
         Tratamiento entity = tratamientoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Tratamiento no encontrado"));
         entity.setEstado(false);
-        return convertToDTO(tratamientoRepository.save(entity));
+        Tratamiento guardado = tratamientoRepository.save(entity);
+        historialService.registrar("ANULAR", "Tratamiento", "Se anuló el tratamiento " + guardado.getNombre());
+        return convertToDTO(guardado);
     }
 
     public List<TratamientoDTO> findActivos() {

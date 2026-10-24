@@ -18,11 +18,14 @@ public class MedicamentosService {
 
     private final MedicamentosRepository medicamentosRepository;
     private final DetalleCitaRepository detalleCitaRepository;
+    private final HistorialService historialService;
 
     public MedicamentosService(MedicamentosRepository medicamentosRepository,
-            DetalleCitaRepository detalleCitaRepository) {
+            DetalleCitaRepository detalleCitaRepository,
+            HistorialService historialService) {
         this.medicamentosRepository = medicamentosRepository;
         this.detalleCitaRepository = detalleCitaRepository;
+        this.historialService = historialService;
     }
 
     public List<MedicamentosDTO> findAll() {
@@ -40,7 +43,9 @@ public class MedicamentosService {
 
     public MedicamentosDTO crear(MedicamentosDTO dto) {
         Medicamentos entity = convertToEntity(dto);
-        return convertToDTO(medicamentosRepository.save(entity));
+        Medicamentos guardado = medicamentosRepository.save(entity);
+        historialService.registrar("CREAR", "Medicamento", "Se agregó el medicamento " + guardado.getNombre());
+        return convertToDTO(guardado);
     }
 
     public MedicamentosDTO actualizar(Integer id, MedicamentosDTO dto) {
@@ -53,7 +58,9 @@ public class MedicamentosService {
         entity.setStock(dto.getStock());
         entity.setEstado(dto.getEstado());
 
-        return convertToDTO(medicamentosRepository.save(entity));
+        Medicamentos guardado = medicamentosRepository.save(entity);
+        historialService.registrar("MODIFICAR", "Medicamento", "Se modificó el medicamento " + guardado.getNombre());
+        return convertToDTO(guardado);
     }
 
     public void eliminar(Integer id) {
@@ -61,14 +68,18 @@ public class MedicamentosService {
             throw new ReglaNegocioException(
                     "No se puede eliminar: el medicamento ya se usó en citas. Use Anular.");
         }
+        String nombre = medicamentosRepository.findById(id).map(Medicamentos::getNombre).orElse("#" + id);
         medicamentosRepository.deleteById(id);
+        historialService.registrar("ELIMINAR", "Medicamento", "Se eliminó el medicamento " + nombre);
     }
 
     public MedicamentosDTO anular(Integer id) {
         Medicamentos entity = medicamentosRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Medicamento no encontrado"));
         entity.setEstado(false);
-        return convertToDTO(medicamentosRepository.save(entity));
+        Medicamentos guardado = medicamentosRepository.save(entity);
+        historialService.registrar("ANULAR", "Medicamento", "Se anuló el medicamento " + guardado.getNombre());
+        return convertToDTO(guardado);
     }
 
     public List<MedicamentosDTO> findActivos() {
@@ -109,6 +120,15 @@ public class MedicamentosService {
                     "Stock insuficiente de " + entity.getNombre() + ": hay " + actual + " disponibles.");
         }
         return convertToDTO(entity);
+    }
+
+    @Transactional
+    public MedicamentosDTO ajustarStockManual(Integer id, Integer cambio) {
+        MedicamentosDTO dto = ajustarStock(id, cambio);
+        historialService.registrar("MODIFICAR", "Medicamento",
+                "Se " + (cambio >= 0 ? "sumaron " : "restaron ") + Math.abs(cambio)
+                        + " unidades al stock de " + dto.getNombre());
+        return dto;
     }
 
     // Texto vacío = sin imagen

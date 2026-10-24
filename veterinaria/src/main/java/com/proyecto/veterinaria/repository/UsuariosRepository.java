@@ -17,4 +17,9 @@ public interface UsuariosRepository extends JpaRepository<Usuarios, Integer> {
     boolean existsByUsuario(String usuario);
 
     boolean existsByCorreo(String correo);
+
+    // Para modificar: ignora al propio usuario
+    boolean existsByUsuarioAndIdUsuarioNot(String usuario, Integer idUsuario);
+
+    boolean existsByCorreoAndIdUsuarioNot(String correo, Integer idUsuario);
 }

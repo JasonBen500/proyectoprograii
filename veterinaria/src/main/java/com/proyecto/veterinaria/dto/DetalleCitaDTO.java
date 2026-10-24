@@ -9,8 +9,7 @@ import lombok.Data;
 public class DetalleCitaDTO {
     private Integer idDetalleCita;
 
-    @NotNull(message = "El precio aplicado es obligatorio")
-    @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0")
+    // Lo fija el servidor con el precio del catálogo; el valor enviado se ignora
     private BigDecimal precioAplicado;
 
     private Boolean estado;

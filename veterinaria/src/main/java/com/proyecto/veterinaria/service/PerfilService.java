@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 public class PerfilService {
 
     private final PerfilRepository perfilRepository;
+    private final HistorialService historialService;
 
-    public PerfilService(PerfilRepository perfilRepository) {
+    public PerfilService(PerfilRepository perfilRepository, HistorialService historialService) {
         this.perfilRepository = perfilRepository;
+        this.historialService = historialService;
     }
 
     public List<PerfilDTO> findAll() {
@@ -34,7 +36,9 @@ public class PerfilService {
 
     public PerfilDTO crear(PerfilDTO dto) {
         Perfil entity = convertToEntity(dto);
-        return convertToDTO(perfilRepository.save(entity));
+        Perfil guardado = perfilRepository.save(entity);
+        historialService.registrar("CREAR", "Perfil", "Se agregó el perfil " + guardado.getNombrePerfil());
+        return convertToDTO(guardado);
     }
 
     public PerfilDTO actualizar(Integer id, PerfilDTO dto) {
@@ -44,14 +48,18 @@ public class PerfilService {
         entity.setNombrePerfil(dto.getNombrePerfil());
         entity.setEstado(dto.getEstado());
 
-        return convertToDTO(perfilRepository.save(entity));
+        Perfil guardado = perfilRepository.save(entity);
+        historialService.registrar("MODIFICAR", "Perfil", "Se modificó el perfil " + guardado.getNombrePerfil());
+        return convertToDTO(guardado);
     }
 
     public PerfilDTO anular(Integer id) {
         Perfil entity = perfilRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Perfil no encontrado"));
         entity.setEstado(false);
-        return convertToDTO(perfilRepository.save(entity));
+        Perfil guardado = perfilRepository.save(entity);
+        historialService.registrar("ANULAR", "Perfil", "Se anuló el perfil " + guardado.getNombrePerfil());
+        return convertToDTO(guardado);
     }
 
     public List<PerfilDTO> findActivos() {

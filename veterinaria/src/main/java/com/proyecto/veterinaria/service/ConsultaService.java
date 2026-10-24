@@ -9,15 +9,27 @@ import com.proyecto.veterinaria.repository.ConsultaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class ConsultaService {
 
     private final ConsultaRepository consultaRepository;
+    private final HistorialService historialService;
 
-    public ConsultaService(ConsultaRepository consultaRepository) {
+    public ConsultaService(ConsultaRepository consultaRepository, HistorialService historialService) {
         this.consultaRepository = consultaRepository;
+        this.historialService = historialService;
+    }
+
+    // " de Firulais (20/10/2026 10:30)": la consulta descrita por su cita, sin mostrar ids
+    private String descripcion(Integer idCita) {
+        return Objects.toString(historialService.describirCita(idCita), "");
+    }
+
+    private Integer idCitaDe(Consulta consulta) {
+        return consulta.getIdCita() != null ? consulta.getIdCita().getIdCita() : null;
     }
 
     // ENCONTRAR A TODOS
@@ -61,7 +73,10 @@ public class ConsultaService {
 
     public ConsultaDTO crear(ConsultaDTO dto) {
         Consulta entity = convertToEntity(dto);
-        return convertToDTO(consultaRepository.save(entity));
+        Consulta guardada = consultaRepository.save(entity);
+        historialService.registrar("CONSULTA", "Consulta",
+                "Se inició la consulta" + descripcion(dto.getIdCita()));
+        return convertToDTO(guardada);
     }
 
     public ConsultaDTO actualizar(Integer id, ConsultaDTO dto) {
@@ -74,14 +89,20 @@ public class ConsultaService {
         if (dto.getIdCita() != null)
             entity.setIdCita(new Cita(dto.getIdCita()));
 
-        return convertToDTO(consultaRepository.save(entity));
+        Consulta guardada = consultaRepository.save(entity);
+        historialService.registrar("MODIFICAR", "Consulta",
+                "Se modificó la consulta" + descripcion(idCitaDe(guardada)));
+        return convertToDTO(guardada);
     }
 
     public ConsultaDTO anular(Integer id) {
         Consulta entity = consultaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Consulta no encontrada"));
         entity.setEstado(false);
-        return convertToDTO(consultaRepository.save(entity));
+        Consulta guardada = consultaRepository.save(entity);
+        historialService.registrar("ANULAR", "Consulta",
+                "Se anuló la consulta" + descripcion(idCitaDe(guardada)));
+        return convertToDTO(guardada);
     }
 
     private Consulta convertToEntity(ConsultaDTO dto) {

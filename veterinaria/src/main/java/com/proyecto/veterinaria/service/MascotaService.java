@@ -15,9 +15,11 @@ import java.util.stream.Collectors;
 public class MascotaService {
 
     private final MascotaRepository mascotaRepository;
+    private final HistorialService historialService;
 
-    public MascotaService(MascotaRepository mascotaRepository) {
+    public MascotaService(MascotaRepository mascotaRepository, HistorialService historialService) {
         this.mascotaRepository = mascotaRepository;
+        this.historialService = historialService;
     }
 
     public List<MascotaDTO> filtroActivas() {
@@ -62,8 +64,10 @@ public class MascotaService {
     }
 
     public MascotaDTO agregar(MascotaDTO dto) {
-        Mascota entity = convertToEntity(dto);
-        return convertToDTO(mascotaRepository.save(entity));
+        Mascota entity = mascotaRepository.save(convertToEntity(dto));
+        historialService.registrar("CREAR", "Mascota",
+                "Se agregó la mascota " + entity.getNombre() + " (" + entity.getEspecie() + ")");
+        return convertToDTO(entity);
     }
 
     public MascotaDTO modificar(Integer id, MascotaDTO dto) {
@@ -78,14 +82,20 @@ public class MascotaService {
         if (dto.getIdDueno() != null)
             entity.setIdDueno(new Dueno(dto.getIdDueno()));
 
-        return convertToDTO(mascotaRepository.save(entity));
+        Mascota guardada = mascotaRepository.save(entity);
+        historialService.registrar("MODIFICAR", "Mascota",
+                "Se modificó la mascota " + guardada.getNombre());
+        return convertToDTO(guardada);
     }
 
     public MascotaDTO anular(Integer id) {
         Mascota entity = mascotaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Mascota no encontrada"));
         entity.setEstado(false);
-        return convertToDTO(mascotaRepository.save(entity));
+        Mascota guardada = mascotaRepository.save(entity);
+        historialService.registrar("ANULAR", "Mascota",
+                "Se anuló la mascota " + guardada.getNombre());
+        return convertToDTO(guardada);
     }
 
     private Mascota convertToEntity(MascotaDTO dto) {

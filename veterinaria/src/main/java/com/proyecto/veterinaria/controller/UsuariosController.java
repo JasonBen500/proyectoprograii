@@ -6,6 +6,7 @@ import com.proyecto.veterinaria.dto.MessageResponse;
 import com.proyecto.veterinaria.dto.UsuariosDTO;
 import com.proyecto.veterinaria.service.UsuariosService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -69,8 +70,8 @@ public class UsuariosController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO dto) {
-        LoginResponseDTO respuesta = usuariosService.login(dto);
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO dto, HttpServletRequest request) {
+        LoginResponseDTO respuesta = usuariosService.login(dto, request.getRemoteAddr());
         return ResponseEntity.ok(respuesta);
     }
 }

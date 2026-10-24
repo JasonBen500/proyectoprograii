@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import com.proyecto.veterinaria.entity.Usuarios;
+import com.proyecto.veterinaria.repository.UsuariosRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,9 +22,17 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UsuariosRepository usuariosRepository;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthFilter(JwtService jwtService, UsuariosRepository usuariosRepository) {
         this.jwtService = jwtService;
+        this.usuariosRepository = usuariosRepository;
+    }
+
+    private void responder401(HttpServletResponse response, String mensaje) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"mensaje\":\"" + mensaje + "\"}");
     }
 
     @Override
@@ -46,7 +56,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (usuario != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 if (jwtService.tokenValido(token, usuario)) {
-                    String rol = jwtService.extraerRol(token);
+                    // El usuario y su perfil se leen de la BD: si lo desactivan o le cambian
+                    // el perfil, el cambio aplica de inmediato aunque el token siga vigente
+                    Usuarios u = usuariosRepository.findByUsuario(usuario).orElse(null);
+                    if (u == null || !Boolean.TRUE.equals(u.getEstado()) || u.getIdPerfil() == null) {
+                        responder401(response, "Sesión inválida o usuario inactivo");
+                        return;
+                    }
+                    String rol = JwtService.normalizarRol(u.getIdPerfil().getNombrePerfil());
                     List<SimpleGrantedAuthority> permisos = (rol == null || rol.isBlank())
                             ? List.of()
                             : List.of(new SimpleGrantedAuthority("ROLE_" + rol));
@@ -58,9 +75,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         } catch (JwtException | IllegalArgumentException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"mensaje\":\"Sesión expirada o token inválido\"}");
+            responder401(response, "Sesión expirada o token inválido");
             return;
         }
 

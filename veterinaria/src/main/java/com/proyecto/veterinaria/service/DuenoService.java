@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 public class DuenoService {
 
     private final DuenoRepository duenoRepository;
+    private final HistorialService historialService;
 
-    public DuenoService(DuenoRepository duenoRepository) {
+    public DuenoService(DuenoRepository duenoRepository, HistorialService historialService) {
         this.duenoRepository = duenoRepository;
+        this.historialService = historialService;
     }
 
     public List<DuenoDTO> findAll() {
@@ -58,8 +60,10 @@ public class DuenoService {
     }
 
     public DuenoDTO crear(DuenoDTO dto) {
-        Dueno entity = convertToEntity(dto);
-        return convertToDTO(duenoRepository.save(entity));
+        Dueno entity = duenoRepository.save(convertToEntity(dto));
+        historialService.registrar("CREAR", "Dueño",
+                "Se agregó el dueño " + entity.getNombre() + " " + entity.getApellido());
+        return convertToDTO(entity);
     }
 
     public DuenoDTO actualizar(Integer id, DuenoDTO dto) {
@@ -72,14 +76,20 @@ public class DuenoService {
         entity.setDireccion(dto.getDireccion());
         entity.setEstado(dto.getEstado());
 
-        return convertToDTO(duenoRepository.save(entity));
+        Dueno guardado = duenoRepository.save(entity);
+        historialService.registrar("MODIFICAR", "Dueño",
+                "Se modificó el dueño " + guardado.getNombre() + " " + guardado.getApellido());
+        return convertToDTO(guardado);
     }
 
     public DuenoDTO anular(Integer id) {
         Dueno entity = duenoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Dueno no encontrado"));
         entity.setEstado(false);
-        return convertToDTO(duenoRepository.save(entity));
+        Dueno guardado = duenoRepository.save(entity);
+        historialService.registrar("ANULAR", "Dueño",
+                "Se anuló el dueño " + guardado.getNombre() + " " + guardado.getApellido());
+        return convertToDTO(guardado);
     }
 
     private Dueno convertToEntity(DuenoDTO dto) {
